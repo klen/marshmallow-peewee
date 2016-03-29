@@ -10,6 +10,7 @@ class SchemaOpts(ma.SchemaOpts):
     def __init__(self, meta):
         super(SchemaOpts, self).__init__(meta)
         self.model = getattr(meta, 'model', None)
+        self.dump_only_pk = getattr(meta, 'dump_only_pk', True)
         if self.model and not issubclass(self.model, pw.Model):
             raise ValueError("`model` must be a subclass of mongoengine.base.BaseDocument")
         self.model_converter = getattr(meta, 'model_converter', ModelConverter)
@@ -30,8 +31,8 @@ class SchemaMeta(ma.schema.SchemaMeta):
                 if isinstance(field, Related):
                     field.init_model(model, name)
 
-            converter = opts.model_converter()
-            declared_fields.update(converter.fields_for_model(model, opts=opts))
+            converter = opts.model_converter(opts=opts)
+            declared_fields.update(converter.fields_for_model(model))
         declared_fields.update(base_fields)
         return declared_fields
 

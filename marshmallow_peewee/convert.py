@@ -5,14 +5,15 @@ from marshmallow.compat import OrderedDict
 
 class Related(fields.Nested):
 
-    def __init__(self, nested=None, **kwargs):
+    def __init__(self, nested=None, meta=None, **kwargs):
+        self.meta = meta or {}
         return super(Related, self).__init__(nested, **kwargs)
 
     def init_model(self, model, name):
         from .schema import ModelSchema
         field = model._meta.fields[name]
-        rel_model = field.rel_model
-        meta = type('Meta', (), {'model': rel_model})
+        self.meta['model'] = field.rel_model
+        meta = type('Meta', (), self.meta)
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
 
 
@@ -38,9 +39,20 @@ class ModelConverter(object):
         pw.ForeignKeyField: fields.Integer,
     }
 
-    def fields_for_model(self, model, opts):
-        fields = opts.fields
+    def __init__(self, opts):
+        self.opts = opts
+
+    def fields_for_model(self, model):
+        fields = self.opts.fields
+        exclude = self.opts.exclude
+
         result = OrderedDict()
+        for field in model._meta.sorted_fields:
+            if fields and field.name not in fields:
+                continue
+            if exclude and field.name in exclude:
+                continue
+
         for field in [f for f in model._meta.sorted_fields if not fields or f.name in fields]:
             ma_field = self.convert_field(field)
             if ma_field:
@@ -64,7 +76,8 @@ class ModelConverter(object):
         return ma_field(**params)
 
     def convert_PrimaryKeyField(self, field, **params):
-        return fields.Integer(dump_only=True, **params)
+        dump_only = self.opts.dump_only_pk
+        return fields.Integer(dump_only=dump_only, **params)
 
     def convert_CharField(self, field, validate=None, **params):
         validate = ma_validate.Length(max=field.max_length)

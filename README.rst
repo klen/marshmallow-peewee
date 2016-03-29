@@ -98,6 +98,42 @@ Installation
 Usage
 =====
 
+.. code-block:: python
+
+    import peewee as pw
+
+
+    class Role(pw.Model):
+        name = pw.CharField(255, default='user')
+
+
+    class User(pw.Model):
+
+        created = pw.DateTimeField(default=dt.datetime.now())
+        name = pw.CharField(255)
+        title = pw.CharField(127, null=True)
+        active = pw.BooleanField(default=True)
+        rating = pw.IntegerField(default=0)
+
+        role = pw.ForeignKeyField(Role)
+
+
+    from marshmallow_peewee import ModelSchema
+
+    class UserSchema(ModelSchema):
+
+        class Meta:
+
+            # model: Bind peewee.Model to the Schema
+            model = User
+
+            # model_converter: Use custom model_converter
+            # model_converter = marshmallow_peewee.ModelConverter
+
+            # dump_only_pk: Primary key is dump only
+            # dump_only_pk = True
+
+
 .. _bugtracker:
 
 Bug tracker

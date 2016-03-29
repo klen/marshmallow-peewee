@@ -64,6 +64,7 @@ def test_schema_related(db):
 
         class Meta:
             model = User
+            dump_only_pk = False
 
     role = Role.create()
     user = User.create(name='Mike', role=role)
@@ -76,4 +77,5 @@ def test_schema_related(db):
     result, errors = UserSchema().load(result)
     assert not errors
     assert isinstance(result, User)
+    assert result.id == 1
     assert isinstance(result.role, Role)
