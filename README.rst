@@ -148,7 +148,7 @@ at https://github.com/klen/peewee-marshmallow/issues
 Contributing
 ============
 
-Development of The Flask-restler happens at: https://github.com/klen/peewee-marshmallow
+Development of The Marshmallow-Peewee happens at: https://github.com/klen/peewee-marshmallow
 
 
 Contributors
