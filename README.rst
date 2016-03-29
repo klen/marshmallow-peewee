@@ -55,7 +55,7 @@ Marshmallow-Peewee -- Peewee_ integration with the Marshmallow_ (de)serializatio
 
     class UserSchema(ModelSchema):
 
-        role = Related(only)
+        role = Related()
 
         class Meta:
             model = User
