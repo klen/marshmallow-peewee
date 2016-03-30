@@ -17,8 +17,8 @@ class Related(fields.Nested):
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
 
     def _deserialize(self, value, attr, data):
-        if isinstance(value, int):
-            return value
+        if isinstance(value, (int, str)):
+            return int(value)
         return super(Related, self)._deserialize(value, attr, data)
 
 

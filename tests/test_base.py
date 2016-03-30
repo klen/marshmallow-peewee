@@ -82,7 +82,7 @@ def test_schema_related(db):
 
     result, errors = UserSchema().load({
         'name': 'Kevin',
-        'role': 1
+        'role': '1'
     })
     assert not result.id
     assert result.role
