@@ -63,7 +63,7 @@ class ModelConverter(object):
         params = {
             'allow_none': field.null,
             'attribute': field.name,
-            'required': not field.null and not field.default,
+            'required': not field.null and field.default is None,
             'validate': field.coerce,
         }
 
