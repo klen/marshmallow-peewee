@@ -79,3 +79,23 @@ def test_schema_related(db):
     assert isinstance(result, User)
     assert result.id == 1
     assert isinstance(result.role, Role)
+
+
+def tests_partition(db):
+    proxy.initialize(db)
+    db.create_tables([Role, User], safe=True)
+
+    from marshmallow_peewee import ModelSchema
+
+    class UserSchema(ModelSchema):
+        class Meta:
+            model = User
+
+    role = Role.create()
+    user = User.create(name='Mike', role=role)
+
+    result, errors = UserSchema().load({
+        'name': 'David'
+    }, instance=user, partial=True)
+    assert result.id == user.id
+    assert user.name == 'David'

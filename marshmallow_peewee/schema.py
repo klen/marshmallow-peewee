@@ -41,9 +41,23 @@ class ModelSchema(with_metaclass(SchemaMeta, ma.Schema)):
 
     OPTIONS_CLASS = SchemaOpts
 
+    def __init__(self, instance=None, **kwargs):
+        self.instance = instance
+        super(ModelSchema, self).__init__(**kwargs)
+
     @ma.post_load
-    def _make_object(self, data):
+    def make_instance(self, data):
         """Build object from data."""
-        if self.opts.model:
-            return self.opts.model(**data)
-        return data
+        if not self.opts.model:
+            return data
+
+        if self.instance is not None:
+            for key, value in data.items():
+                setattr(self.instance, key, value)
+            return self.instance
+
+        return self.opts.model(**data)
+
+    def load(self, data, instance=None, *args, **kwargs):
+        self.instance = instance or self.instance
+        return super(ModelSchema, self).load(data, *args, **kwargs)
