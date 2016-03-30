@@ -80,6 +80,13 @@ def test_schema_related(db):
     assert result.id == 1
     assert isinstance(result.role, Role)
 
+    result, errors = UserSchema().load({
+        'name': 'Kevin',
+        'role': 1
+    })
+    assert not result.id
+    assert result.role
+
 
 def tests_partition(db):
     proxy.initialize(db)

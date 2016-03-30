@@ -16,6 +16,11 @@ class Related(fields.Nested):
         meta = type('Meta', (), self.meta)
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
 
+    def _deserialize(self, value, attr, data):
+        if isinstance(value, int):
+            return value
+        return super(Related, self)._deserialize(value, attr, data)
+
 
 class ModelConverter(object):
 
@@ -78,9 +83,9 @@ class ModelConverter(object):
         ma_field = self.TYPE_MAPPING.get(type(field), fields.Raw)
         return ma_field(**params)
 
-    def convert_PrimaryKeyField(self, field, **params):
+    def convert_PrimaryKeyField(self, field, required=False, **params):
         dump_only = self.opts.dump_only_pk
-        return fields.Integer(dump_only=dump_only, **params)
+        return fields.Integer(dump_only=dump_only, required=False, **params)
 
     def convert_CharField(self, field, validate=None, **params):
         validate = ma_validate.Length(max=field.max_length)
