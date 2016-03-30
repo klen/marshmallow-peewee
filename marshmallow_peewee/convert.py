@@ -22,6 +22,13 @@ class Related(fields.Nested):
         return super(Related, self)._deserialize(value, attr, data)
 
 
+class ForeignKey(fields.Integer):
+
+    def get_value(self, attr, obj, *args, **kwargs):
+        """Return the value for a given key from an object."""
+        return obj._data.get(attr)
+
+
 class ModelConverter(object):
 
     """ Convert Peewee model to Marshmallow schema."""
@@ -41,7 +48,7 @@ class ModelConverter(object):
         pw.DateField: fields.Date,
         pw.TimeField: fields.Time,
         pw.BooleanField: fields.Boolean,
-        pw.ForeignKeyField: fields.Integer,
+        pw.ForeignKeyField: ForeignKey,
     }
 
     def __init__(self, opts):
@@ -90,6 +97,3 @@ class ModelConverter(object):
     def convert_CharField(self, field, validate=None, **params):
         validate = ma_validate.Length(max=field.max_length)
         return fields.String(validate=validate, **params)
-
-    def convert_ForeignKeyField(self, field, attribute=None, **params):
-        return fields.Integer(attribute=field.db_column, **params)
