@@ -28,7 +28,7 @@ class SchemaMeta(ma.schema.SchemaMeta):
         model = getattr(opts, 'model', None)
         if model:
             for name, field in base_fields.items():
-                if isinstance(field, Related):
+                if isinstance(field, Related) and field.nested is None:
                     field.init_model(model, name)
 
             converter = opts.model_converter(opts=opts)

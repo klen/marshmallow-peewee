@@ -90,6 +90,25 @@ def test_schema_related(db):
     assert not result.id
     assert result.role
 
+    class RoleSchema(ModelSchema):
+
+        class Meta:
+            model = Role
+            fields = 'id',
+
+    class UserSchema(ModelSchema):
+
+        role = Related(RoleSchema)
+
+        class Meta:
+            model = User
+            dump_only_pk = False
+
+    result, errors = UserSchema().dump(user)
+    assert not errors
+    assert result
+    assert 'name' not in result['role']
+
 
 def tests_partition(db):
     proxy.initialize(db)
