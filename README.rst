@@ -47,7 +47,7 @@ Marshmallow-Peewee -- Peewee_ integration with the Marshmallow_ (de)serializatio
     #  'role': 1,
     #  'title': None}
 
-    result, errors = UserSchema().load(user)
+    result, errors = UserSchema().load(result)
     assert isinstance(result, User)
     assert result.name == 'Mike'
 
