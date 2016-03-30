@@ -63,10 +63,13 @@ class ModelConverter(object):
         params = {
             'allow_none': field.null,
             'attribute': field.name,
-            'default': field.default,
             'required': not field.null and not field.default,
             'validate': field.coerce,
         }
+
+        if field.default is not None and not callable(field.default):
+            params['default'] = field.default
+
         method = getattr(self, 'convert_' + field.__class__.__name__, self.convert_default)
         return method(field, **params)
 
