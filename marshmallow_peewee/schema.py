@@ -12,7 +12,7 @@ class SchemaOpts(ma.SchemaOpts):
         self.model = getattr(meta, 'model', None)
         self.dump_only_pk = getattr(meta, 'dump_only_pk', True)
         if self.model and not issubclass(self.model, pw.Model):
-            raise ValueError("`model` must be a subclass of mongoengine.base.BaseDocument")
+            raise ValueError("`model` must be a subclass of peewee.Model")
         self.model_converter = getattr(meta, 'model_converter', ModelConverter)
 
 
