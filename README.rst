@@ -89,9 +89,9 @@ Requirements
 Installation
 =============
 
-**Peewee-Marshmallow** should be installed using pip: ::
+**Marshmallow-Peewee** should be installed using pip: ::
 
-    pip install peewee-marshmallow
+    pip install Marshmallow-Peewee
 
 .. _usage:
 
@@ -141,14 +141,14 @@ Bug tracker
 
 If you have any suggestions, bug reports or
 annoyances please report them to the issue tracker
-at https://github.com/klen/peewee-marshmallow/issues
+at https://github.com/klen/marshmallow-peewee/issues
 
 .. _contributing:
 
 Contributing
 ============
 
-Development of The Marshmallow-Peewee happens at: https://github.com/klen/peewee-marshmallow
+Development of The Marshmallow-Peewee happens at: https://github.com/klen/marshmallow-peewee
 
 
 Contributors
