@@ -72,6 +72,8 @@ def test_schema_related(db):
     role = Role.create()
     user = User.create(name='Mike', role=role)
 
+    assert UserSchema._declared_fields['role'].attribute == 'role'
+
     result, errors = UserSchema().dump(user)
     assert not errors
     assert result

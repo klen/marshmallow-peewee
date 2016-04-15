@@ -12,6 +12,7 @@ class Related(fields.Nested):
     def init_model(self, model, name):
         from .schema import ModelSchema
         field = model._meta.fields[name]
+        self.attribute = self.attribute or name
         self.meta['model'] = field.rel_model
         meta = type('Meta', (), self.meta)
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
