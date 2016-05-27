@@ -98,3 +98,6 @@ class ModelConverter(object):
     def convert_CharField(self, field, validate=None, **params):
         validate = ma_validate.Length(max=field.max_length)
         return fields.String(validate=validate, **params)
+
+    def convert_BooleanField(self, field, validate=None, **params):
+        return fields.Boolean(**params)

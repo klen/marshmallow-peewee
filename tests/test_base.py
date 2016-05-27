@@ -40,8 +40,11 @@ def test_schema(db):
     role = Role.create()
     user = User.create(name='Mike', role=role)
 
-    result, errors = UserSchema().load({'name': 'Bob', 'role': 1})
+    schema = UserSchema()
+    result, errors = schema.load({'name': 'Bob', 'role': 1, 'active': False})
+    assert not errors
     assert result.role
+    assert not result.active
 
     result, errors = UserSchema().dump(user)
     assert not errors
