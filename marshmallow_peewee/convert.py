@@ -23,7 +23,7 @@ class Related(fields.Nested):
             rel_model = field.rel_model
 
         self.attribute = self.attribute or name
-        self.meta['model'] = field.rel_model
+        self.meta['model'] = rel_model
         meta = type('Meta', (), self.meta)
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
 
