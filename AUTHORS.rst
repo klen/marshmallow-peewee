@@ -10,4 +10,4 @@ Development Lead
 Contributors
 ------------
 
-Nobody is here. Wanna be first one?
+* Alexey Moskalenko (https://github.com/pyalex)
