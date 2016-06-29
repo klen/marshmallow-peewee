@@ -11,7 +11,17 @@ class Related(fields.Nested):
 
     def init_model(self, model, name):
         from .schema import ModelSchema
-        field = model._meta.fields[name]
+        field = model._meta.fields.get(name)
+
+        if not field:
+            field = model._meta.reverse_rel.get(name)
+            if not field:
+                raise KeyError(name)
+            self.many = True
+            rel_model = field.model_class
+        else:
+            rel_model = field.rel_model
+
         self.attribute = self.attribute or name
         self.meta['model'] = field.rel_model
         meta = type('Meta', (), self.meta)
