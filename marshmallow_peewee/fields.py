@@ -17,7 +17,10 @@ class Timestamp(Field):
         if not value:  # Falsy values, e.g. '', None, [] are not valid
             raise self.fail('invalid')
 
-        return datetime.utcfromtimestamp(value)
+        try:
+            return datetime.utcfromtimestamp(float(value))
+        except ValueError:
+            raise self.fail('invalid')
 
 
 if PY2:
