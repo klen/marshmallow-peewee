@@ -31,9 +31,12 @@ def test_schema(db):
     proxy.initialize(db)
     db.create_tables([Role, User], safe=True)
 
-    from marshmallow_peewee import ModelSchema
+    from marshmallow_peewee import ModelSchema, Timestamp
 
     class UserSchema(ModelSchema):
+
+        created = Timestamp()
+
         class Meta:
             model = User
 
@@ -51,6 +54,7 @@ def test_schema(db):
     assert result
     assert result['id'] == 1
     assert result['name'] == 'Mike'
+    assert result['created'] > 100000
 
     result, errors = UserSchema().load(result)
     assert not errors

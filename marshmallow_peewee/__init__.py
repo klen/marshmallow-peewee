@@ -4,3 +4,4 @@ __version__ = "1.0.0"
 
 from .schema import ModelSchema # noqa
 from .convert import Related    # noqa
+from .fields import Timestamp   # noqa
