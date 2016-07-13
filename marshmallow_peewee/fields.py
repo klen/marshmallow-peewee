@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+import datetime as dt
 
 from marshmallow.compat import PY2
 from marshmallow.fields import Field
@@ -22,18 +22,18 @@ class Timestamp(Field):
             raise self.fail('invalid')
 
         try:
-            return datetime.utcfromtimestamp(float(value))
+            return dt.datetime.utcfromtimestamp(float(value))
         except ValueError:
             raise self.fail('invalid')
 
 
 if PY2:
-    def datetime_to_timestamp(dt, epoch=datetime(1979, 1, 1)):
+    def datetime_to_timestamp(dt_, epoch=dt.datetime(1979, 1, 1)):
         """Convert given datetime object to timestamp in seconds."""
-        return (dt - epoch).total_seconds()
+        return (dt_ - epoch).total_seconds()
 
 else:
 
-    def datetime_to_timestamp(dt):
+    def datetime_to_timestamp(dt_):
         """Convert given datetime object to timestamp in seconds."""
-        return dt.replace(tzinfo=timezone.utc).timestamp()
+        return dt_.replace(tzinfo=dt.timezone.utc).timestamp()
