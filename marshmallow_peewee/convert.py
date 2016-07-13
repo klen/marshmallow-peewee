@@ -33,7 +33,7 @@ class Related(fields.Nested):
         return super(Related, self)._deserialize(value, attr, data)
 
 
-class ForeignKey(fields.Integer):
+class ForeignKey(fields.Raw):
 
     def get_value(self, attr, obj, *args, **kwargs):
         """Return the value for a given key from an object."""
