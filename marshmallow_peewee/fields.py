@@ -6,6 +6,10 @@ from marshmallow.fields import Field
 
 class Timestamp(Field):
 
+    default_error_messages = {
+        'invalid': 'Not a valid timestamp.'
+    }
+
     def _serialize(self, value, attr, obj):
         """Serialize given datetime to timestamp."""
         if value is None:
