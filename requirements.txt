@@ -1,2 +1,2 @@
-marshmallow     == 2.6.1
-peewee          == 2.8.0
+marshmallow     >= 2.6.1
+peewee          >= 2.8.0
