@@ -28,7 +28,7 @@ class Timestamp(Field):
 
 
 if PY2:
-    def datetime_to_timestamp(dt_, epoch=dt.datetime(1979, 1, 1)):
+    def datetime_to_timestamp(dt_, epoch=dt.datetime(1970, 1, 1)):
         """Convert given datetime object to timestamp in seconds."""
         return (dt_ - epoch).total_seconds()
 
