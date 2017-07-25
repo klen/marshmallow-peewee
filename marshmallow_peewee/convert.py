@@ -48,6 +48,7 @@ class ModelConverter(object):
         pw.PrimaryKeyField: fields.Integer,
         pw.IntegerField: fields.Integer,
         pw.BigIntegerField: fields.Integer,
+        pw.SmallIntegerField: fields.Integer,
         pw.FloatField: fields.Float,
         pw.DoubleField: fields.Float,
         pw.DecimalField: fields.Decimal,
