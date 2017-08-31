@@ -16,7 +16,22 @@ class SchemaOpts(ma.SchemaOpts):
         self.model_converter = getattr(meta, 'model_converter', ModelConverter)
 
 
+INHERITANCE_OPTIONS = 'model', 'model_converter', 'dump_only_pk'
+
+
 class SchemaMeta(ma.schema.SchemaMeta):
+
+    def __new__(mcs, name, bases, attrs):
+        """Support inheritance for model and model_converter Meta options."""
+        if 'Meta' in attrs and bases:
+            meta = attrs['Meta']
+            base_meta = getattr(bases[0], 'Meta', None)
+            for option in INHERITANCE_OPTIONS:
+                if hasattr(meta, option) or not hasattr(base_meta, option):
+                    continue
+                setattr(meta, option, getattr(base_meta, option))
+
+        return super(SchemaMeta, mcs).__new__(mcs, name, bases, attrs)
 
     @classmethod
     def get_declared_fields(mcs, klass, cls_fields, inherited_fields, dict_cls):

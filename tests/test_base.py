@@ -1,5 +1,6 @@
 import peewee as pw
 import datetime as dt
+import marshmallow as ma
 
 
 proxy = pw.Proxy()
@@ -149,3 +150,33 @@ def tests_partition(db):
     }, instance=user, partial=True)
     assert result.id == user.id
     assert user.name == 'David'
+
+
+def test_custom_converter(db):
+    from marshmallow_peewee import ModelSchema, Related
+    from marshmallow_peewee.convert import ModelConverter
+
+    class CustomModelConverter(ModelConverter):
+
+        def convert_BooleanField(self, field, **params):
+            return ma.fields.Int(**params)
+
+    proxy.initialize(db)
+    db.create_tables([Role, User], safe=True)
+
+    class CustomModelSchema(ModelSchema):
+
+        class Meta:
+            model_converter = CustomModelConverter
+
+    class UserSchema(CustomModelSchema):
+
+        class Meta:
+            model = User
+
+    assert UserSchema.opts.model_converter is CustomModelConverter
+
+    role = Role.create()
+    user = User.create(name='Mike', role=role)
+    serialized = UserSchema().dump(user).data
+    assert serialized['active'] is 1
