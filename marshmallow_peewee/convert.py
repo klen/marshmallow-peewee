@@ -1,6 +1,6 @@
 import peewee as pw
 from marshmallow import fields, validate as ma_validate
-from marshmallow.compat import OrderedDict
+from marshmallow.compat import OrderedDict, string_types
 
 
 class Related(fields.Nested):
@@ -28,7 +28,7 @@ class Related(fields.Nested):
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
 
     def _deserialize(self, value, attr, data):
-        if isinstance(value, (int, str)):
+        if isinstance(value, int) or isinstance(value, string_types):
             return int(value)
         return super(Related, self)._deserialize(value, attr, data)
 
