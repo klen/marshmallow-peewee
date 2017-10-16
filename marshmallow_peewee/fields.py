@@ -27,6 +27,21 @@ class Timestamp(Field):
             raise self.fail('invalid')
 
 
+class MSTimestamp(Timestamp):
+
+    def _serialize(self, value, attr, obj):
+        """Serialize given datetime to timestamp."""
+        if value is not None:
+            value = super(MSTimestamp, self)._serialize(value) * 1e3
+        return value
+
+    def _deserialize(self, value, attr, data):
+        if value:
+            value = value / 1e3
+
+        return super(MSTimestamp, self)._deserialize(value)
+
+
 if PY2:
     def datetime_to_timestamp(dt_, epoch=dt.datetime(1970, 1, 1)):
         """Convert given datetime object to timestamp in seconds."""
