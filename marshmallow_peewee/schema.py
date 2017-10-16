@@ -2,7 +2,8 @@ import marshmallow as ma
 import peewee as pw
 from marshmallow.compat import with_metaclass
 
-from .convert import ModelConverter, Related
+from .convert import ModelConverter
+from .fields import Related
 
 
 class SchemaOpts(ma.SchemaOpts):
