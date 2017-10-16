@@ -1,43 +1,8 @@
 import peewee as pw
 from marshmallow import fields, validate as ma_validate
-from marshmallow.compat import OrderedDict, string_types
+from marshmallow.compat import OrderedDict
 
-
-class Related(fields.Nested):
-
-    def __init__(self, nested=None, meta=None, **kwargs):
-        self.meta = meta or {}
-        return super(Related, self).__init__(nested, **kwargs)
-
-    def init_model(self, model, name):
-        from .schema import ModelSchema
-        field = model._meta.fields.get(name)
-
-        if not field:
-            field = model._meta.reverse_rel.get(name)
-            if not field:
-                raise KeyError(name)
-            self.many = True
-            rel_model = field.model_class
-        else:
-            rel_model = field.rel_model
-
-        self.attribute = self.attribute or name
-        self.meta['model'] = rel_model
-        meta = type('Meta', (), self.meta)
-        self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
-
-    def _deserialize(self, value, attr, data):
-        if isinstance(value, int) or isinstance(value, string_types):
-            return int(value)
-        return super(Related, self)._deserialize(value, attr, data)
-
-
-class ForeignKey(fields.Raw):
-
-    def get_value(self, attr, obj, *args, **kwargs):
-        """Return the value for a given key from an object."""
-        return obj._data.get(attr)
+from .fields import ForeignKey
 
 
 class ModelConverter(object):
@@ -77,7 +42,9 @@ class ModelConverter(object):
             if exclude and field.name in exclude:
                 continue
 
-        for field in [f for f in model._meta.sorted_fields if not fields or f.name in fields]:
+        fields = [f for f in model._meta.sorted_fields
+                  if not fields or f.name in fields]
+        for field in fields:
             ma_field = self.convert_field(field)
             if ma_field:
                 result[field.name] = ma_field
@@ -94,7 +61,8 @@ class ModelConverter(object):
         if field.default is not None and not callable(field.default):
             params['default'] = field.default
 
-        method = getattr(self, 'convert_' + field.__class__.__name__, self.convert_default)
+        method = getattr(self, 'convert_' + field.__class__.__name__,
+                         self.convert_default)
         return method(field, **params)
 
     def convert_default(self, field, **params):
