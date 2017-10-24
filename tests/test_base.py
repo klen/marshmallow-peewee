@@ -32,11 +32,11 @@ def test_schema(db):
     proxy.initialize(db)
     db.create_tables([Role, User], safe=True)
 
-    from marshmallow_peewee import ModelSchema, Timestamp
+    from marshmallow_peewee import ModelSchema, MSTimestamp
 
     class UserSchema(ModelSchema):
 
-        created = Timestamp()
+        created = MSTimestamp()
 
         class Meta:
             model = User
