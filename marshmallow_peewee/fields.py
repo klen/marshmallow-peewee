@@ -29,17 +29,17 @@ class Timestamp(fields.Field):
 
 class MSTimestamp(Timestamp):
 
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, *args):
         """Serialize given datetime to timestamp."""
         if value is not None:
-            value = super(MSTimestamp, self)._serialize(value) * 1e3
+            value = super(MSTimestamp, self)._serialize(value, *args) * 1e3
         return value
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, *args):
         if value:
             value = value / 1e3
 
-        return super(MSTimestamp, self)._deserialize(value)
+        return super(MSTimestamp, self)._deserialize(value, *args)
 
 
 class Related(fields.Nested):
