@@ -76,7 +76,7 @@ class ForeignKey(fields.Raw):
 
     def get_value(self, attr, obj, *args, **kwargs):
         """Return the value for a given key from an object."""
-        return obj._data.get(attr)
+        return str(obj._data.get(attr))
 
 
 if PY2:

@@ -10,17 +10,22 @@ class ModelConverter(object):
     """ Convert Peewee model to Marshmallow schema."""
 
     TYPE_MAPPING = [
-        (pw.ForeignKeyField, ForeignKey),
+        (pw.AutoField, fields.String),
         (pw.IntegerField, fields.Integer),
-        (pw.FloatField, fields.Float),
-        (pw.DecimalField, fields.Decimal),
         (pw.CharField, fields.String),
-        (pw.TextField, fields.String),
-        (pw.UUIDField, fields.UUID),
+        (pw.BooleanField, fields.Boolean),
         (pw.DateTimeField, fields.DateTime),
         (pw.DateField, fields.Date),
+        (pw.TextField, fields.String),
+        (pw.ForeignKeyField, ForeignKey),
+        (pw.FloatField, fields.Float),
+        (pw.DecimalField, fields.Decimal),
         (pw.TimeField, fields.Time),
-        (pw.BooleanField, fields.Boolean),
+        (pw.BigIntegerField, fields.Integer),
+        (pw.SmallIntegerField, fields.Integer),
+        (pw.DoubleField, fields.Float),
+        (pw.FixedCharField, fields.String),
+        (pw.UUIDField, fields.UUID),
     ]
 
     def __init__(self, opts):
@@ -69,7 +74,7 @@ class ModelConverter(object):
 
     def convert_PrimaryKeyField(self, field, required=False, **params):
         dump_only = self.opts.dump_only_pk
-        return fields.Integer(dump_only=dump_only, required=False, **params)
+        return fields.String(dump_only=dump_only, required=False, **params)
 
     def convert_CharField(self, field, validate=None, **params):
         validate = ma_validate.Length(max=field.max_length)
