@@ -10,7 +10,7 @@ class ModelConverter(object):
     """ Convert Peewee model to Marshmallow schema."""
 
     TYPE_MAPPING = {
-        pw.PrimaryKeyField: fields.Integer,
+        pw.PrimaryKeyField: fields.String,
         pw.IntegerField: fields.Integer,
         pw.BigIntegerField: fields.Integer,
         pw.SmallIntegerField: fields.Integer,
@@ -72,7 +72,7 @@ class ModelConverter(object):
 
     def convert_PrimaryKeyField(self, field, required=False, **params):
         dump_only = self.opts.dump_only_pk
-        return fields.Integer(dump_only=dump_only, required=False, **params)
+        return fields.String(dump_only=dump_only, required=False, **params)
 
     def convert_CharField(self, field, validate=None, **params):
         validate = ma_validate.Length(max=field.max_length)
