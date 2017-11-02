@@ -37,7 +37,7 @@ class MSTimestamp(Timestamp):
 
     def _deserialize(self, value, *args):
         if value:
-            value = value / 1e3
+            value = int(value) / 1e3
 
         return super(MSTimestamp, self)._deserialize(value, *args)
 
@@ -46,7 +46,7 @@ class Related(fields.Nested):
 
     def __init__(self, nested=None, meta=None, **kwargs):
         self.meta = meta or {}
-        return super(Related, self).__init__(nested, **kwargs)
+        super(Related, self).__init__(nested, **kwargs)
 
     def init_model(self, model, name):
         from .schema import ModelSchema
@@ -67,7 +67,7 @@ class Related(fields.Nested):
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
 
     def _deserialize(self, value, attr, data):
-        if isinstance(value, int) or isinstance(value, string_types):
+        if isinstance(value, (int, string_types)):
             return int(value)
         return super(Related, self)._deserialize(value, attr, data)
 
