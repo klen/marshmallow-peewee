@@ -53,11 +53,9 @@ class Related(fields.Nested):
         field = model._meta.fields.get(name)
 
         if not field:
-            field = model._meta.reverse_rel.get(name)
-            if not field:
-                raise KeyError(name)
+            field = getattr(model, name, None).field
             self.many = True
-            rel_model = field.model_class
+            rel_model = field.model
         else:
             rel_model = field.rel_model
 
@@ -76,7 +74,7 @@ class ForeignKey(fields.Raw):
 
     def get_value(self, attr, obj, *args, **kwargs):
         """Return the value for a given key from an object."""
-        value = obj._data.get(attr)
+        value = obj.__data__.get(attr)
         if value is not None:
             value = str(value)
         return value

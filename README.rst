@@ -93,6 +93,11 @@ Installation
 
     pip install Marshmallow-Peewee
 
+.. note::
+
+    Marshmallow-Peewee>=2.0.0 supports only Peewee>=3.0.0. For Peewee<3.0.0
+    please use Marhmallow-Peewee==1.2.7
+
 .. _usage:
 
 Usage
