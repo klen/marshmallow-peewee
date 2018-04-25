@@ -9,10 +9,13 @@ proxy = pw.Proxy()
 class Role(pw.Model):
     name = pw.CharField(255, default='user')
 
+    class Meta:
+        database = proxy
+
 
 class User(pw.Model):
 
-    created = pw.DateTimeField(default=dt.datetime.now())
+    created = pw.DateTimeField(default=dt.datetime.now)
     name = pw.CharField(255)
     title = pw.CharField(127, null=True)
     active = pw.BooleanField(default=True)
@@ -30,7 +33,7 @@ def test_base(db):
 
 def test_schema(db):
     proxy.initialize(db)
-    db.create_tables([Role, User], safe=True)
+    db.create_tables([Role, User])
 
     from marshmallow_peewee import ModelSchema, MSTimestamp
 
@@ -77,6 +80,7 @@ def test_schema_related(db):
         class Meta:
             model = User
             dump_only_pk = False
+            exclude = 'rating',
 
     role = Role.create()
     user = User.create(name='Mike', role=role)
@@ -87,6 +91,7 @@ def test_schema_related(db):
     assert not errors
     assert result
     assert result['role']['name'] == 'user'
+    assert 'rating' not in result
 
     result, errors = UserSchema().load(result)
     assert not errors
