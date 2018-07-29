@@ -2,5 +2,5 @@
 -e .
 
 ipdb==0.10.1
-pytest==3.5.1
+pytest==3.6.4
 pytest-sugar==0.7.1
