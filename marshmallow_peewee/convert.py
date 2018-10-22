@@ -1,8 +1,19 @@
 import peewee as pw
-from marshmallow import fields, validate as ma_validate
+from marshmallow import ValidationError, fields
+from marshmallow import validate as ma_validate
 
 from .compat import OrderedDict
 from .fields import ForeignKey
+
+
+def convert_value_validate(converter):
+    def _convert_value_validate(value):
+        try:
+            converter(value)
+        except Exception as e:
+            raise ValidationError(e.message)
+
+    return _convert_value_validate
 
 
 class ModelConverter(object):
@@ -49,11 +60,19 @@ class ModelConverter(object):
             'allow_none': field.null,
             'attribute': field.name,
             'required': not field.null and field.default is None,
-            'validate': field.python_value,
+            'validate': [convert_value_validate(field.python_value)],
         }
 
         if field.default is not None:
             params['default'] = field.default
+
+        if field.choices is not None:
+            choices = []
+            labels = []
+            for c in field.choices:
+                choices.append(c[0])
+                labels.append(c[1])
+            params['validate'].append(ma_validate.OneOf(choices, labels))
 
         # use first "known" field class from field class mro
         # so that extended field classes get converted correctly
@@ -81,7 +100,7 @@ class ModelConverter(object):
     convert_BigAutoField = convert_AutoField
 
     def convert_CharField(self, field, validate=None, **params):
-        validate = ma_validate.Length(max=field.max_length)
+        validate += [ma_validate.Length(max=field.max_length)]
         return fields.String(validate=validate, **params)
 
     def convert_BooleanField(self, field, validate=None, **params):
