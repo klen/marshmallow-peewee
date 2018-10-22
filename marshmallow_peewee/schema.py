@@ -1,15 +1,15 @@
 import marshmallow as ma
 import peewee as pw
-from marshmallow.compat import with_metaclass
 
+from .compat import with_metaclass
 from .convert import ModelConverter
 from .fields import Related
 
 
 class SchemaOpts(ma.SchemaOpts):
 
-    def __init__(self, meta):
-        super(SchemaOpts, self).__init__(meta)
+    def __init__(self, meta, **kwargs):
+        super(SchemaOpts, self).__init__(meta, **kwargs)
         self.model = getattr(meta, 'model', None)
         self.dump_only_pk = getattr(meta, 'dump_only_pk', True)
         if self.model and not issubclass(self.model, pw.Model):
