@@ -1,7 +1,8 @@
 import datetime as dt
 
 from marshmallow import fields
-from marshmallow.compat import PY2, string_types
+
+from .compat import PY2, string_types
 
 
 class Timestamp(fields.Field):
