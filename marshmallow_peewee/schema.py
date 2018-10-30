@@ -1,7 +1,7 @@
 import marshmallow as ma
 import peewee as pw
 
-from .compat import with_metaclass
+from marshmallow.compat import with_metaclass
 from .convert import ModelConverter
 from .fields import Related
 

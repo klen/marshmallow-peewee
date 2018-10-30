@@ -2,18 +2,8 @@ import peewee as pw
 from marshmallow import ValidationError, fields
 from marshmallow import validate as ma_validate
 
-from .compat import OrderedDict
+from collections import OrderedDict
 from .fields import ForeignKey
-
-
-def convert_value_validate(converter):
-    def _convert_value_validate(value):
-        try:
-            converter(value)
-        except Exception as e:
-            raise ValidationError(e.message)
-
-    return _convert_value_validate
 
 
 class ModelConverter(object):
@@ -75,15 +65,12 @@ class ModelConverter(object):
 
         # use first "known" field class from field class mro
         # so that extended field classes get converted correctly
-        method = self.convert_default
         for klass in field.__class__.mro():
-            try:
-                method = getattr(self, 'convert_' + klass.__name__)
+            method = getattr(self, 'convert_' + klass.__name__, None)
+            if method or klass in self.TYPE_MAPPING:
                 break
-            except AttributeError:
-                if klass in self.TYPE_MAPPING:
-                    break
 
+        method = method or self.convert_default
         return method(field, **params)
 
     def convert_default(self, field, **params):
@@ -102,3 +89,13 @@ class ModelConverter(object):
 
     def convert_BooleanField(self, field, validate=None, **params):
         return fields.Boolean(**params)
+
+
+def convert_value_validate(converter):
+    def validator(value):
+        try:
+            converter(value)
+        except Exception as e:
+            raise ValidationError(e.message)
+
+    return validator
