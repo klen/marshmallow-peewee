@@ -1,34 +1,13 @@
+import pytest
 import peewee as pw
 import datetime as dt
 import marshmallow as ma
 
-
-proxy = pw.Proxy()
-
-
-class Role(pw.Model):
-    name = pw.CharField(255, default='user')
-
-    class Meta:
-        database = proxy
+from .models import proxy, Role, User
 
 
-class User(pw.Model):
-
-    created = pw.DateTimeField(default=dt.datetime.now)
-    name = pw.CharField(255)
-    title = pw.CharField(127, null=True)
-    active = pw.BooleanField(default=True)
-    rating = pw.IntegerField(default=0)
-
-    role = pw.ForeignKeyField(Role)
-
-    class Meta:
-        database = proxy
-
-
-def test_base(db):
-    assert db
+if ma.__version__.split('.') >= ['3']:
+    pytest.skip('Skip tests for Marshmallow 2', allow_module_level=True)
 
 
 def test_schema(db):

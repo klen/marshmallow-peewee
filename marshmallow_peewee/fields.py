@@ -1,7 +1,10 @@
 import datetime as dt
 
 from marshmallow import fields
+
 from marshmallow.compat import PY2, string_types
+
+from . import MA_VERSION
 
 
 class Timestamp(fields.Field):
@@ -10,14 +13,14 @@ class Timestamp(fields.Field):
         'invalid': 'Not a valid timestamp.'
     }
 
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         """Serialize given datetime to timestamp."""
         if value is None:
             return None
 
         return int(datetime_to_timestamp(value))
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if not value:  # Falsy values, e.g. '', None, [] are not valid
             raise self.fail('invalid')
 
@@ -29,13 +32,13 @@ class Timestamp(fields.Field):
 
 class MSTimestamp(Timestamp):
 
-    def _serialize(self, value, *args):
+    def _serialize(self, value, *args, **kwargs):
         """Serialize given datetime to timestamp."""
         if value is not None:
             value = super(MSTimestamp, self)._serialize(value, *args) * 1e3
         return value
 
-    def _deserialize(self, value, *args):
+    def _deserialize(self, value, *args, **kwargs):
         if value:
             value = int(value) / 1e3
 
@@ -64,7 +67,7 @@ class Related(fields.Nested):
         meta = type('Meta', (), self.meta)
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if isinstance(value, (int, string_types)):
             return int(value)
         return super(Related, self)._deserialize(value, attr, data)
@@ -72,12 +75,21 @@ class Related(fields.Nested):
 
 class ForeignKey(fields.Raw):
 
-    def get_value(self, attr, obj, *args, **kwargs):
-        """Return the value for a given key from an object."""
-        value = obj.__data__.get(attr)
-        if value is not None:
-            value = str(value)
-        return value
+    if MA_VERSION > ['3']:
+        def get_value(self, obj, attr, **kwargs):
+            """Return the value for a given key from an object."""
+            value = obj.__data__.get(attr)
+            if value is not None:
+                value = str(value)
+            return value
+
+    else:
+        def get_value(self, attr, obj, **kwargs):
+            """Return the value for a given key from an object."""
+            value = obj.__data__.get(attr)
+            if value is not None:
+                value = str(value)
+            return value
 
 
 if PY2:
