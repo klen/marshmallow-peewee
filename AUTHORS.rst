@@ -11,3 +11,4 @@ Contributors
 ------------
 
 * Alexey Moskalenko (https://github.com/pyalex)
+* Tadas Dailyda (https://github.com/skirsdeda)
