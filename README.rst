@@ -181,14 +181,6 @@ License
 
 Licensed under a MIT license (See LICENSE)
 
-If you wish to express your appreciation for the project, you are welcome to
-send a postcard to: ::
-
-    Kirill Klenov
-    pos. Severny 8-3
-    MO, Istra, 143500
-    Russia
-
 .. _links:
 
 .. _klen: https://github.com/klen
