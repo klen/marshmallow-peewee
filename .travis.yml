@@ -1,0 +1,23 @@
+language: python
+
+python:
+  - 2.7
+  - 3.6
+
+matrix:
+  include:
+    - python: 2.7
+      env: TOXENV=py27
+    - python: 3.6
+      env: TOXENV=py36-m2
+    - python: 3.6
+      env: TOXENV=py36-m3
+
+branches:
+    only:
+        - master
+        - develop
+
+install: pip install --quiet tox
+
+script: tox -e ${TOXENV}

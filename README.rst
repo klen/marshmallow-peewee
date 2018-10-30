@@ -1,7 +1,20 @@
 Marshmallow-Peewee
 ##################
 
+
 .. _badges:
+
+.. image:: http://img.shields.io/travis/klen/marshmallow-peewee.svg?style=flat-square
+    :target: http://travis-ci.org/klen/marshmallow-peewee
+    :alt: Build Status
+
+.. image:: http://img.shields.io/pypi/v/marshmallow-peewee.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/marshmallow-peewee
+    :alt: Version
+
+.. image:: http://img.shields.io/pypi/l/marshmallow-peewee.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/marshmallow-peewee
+    :alt: License
 
 .. _description:
 
