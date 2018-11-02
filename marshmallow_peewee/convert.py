@@ -1,8 +1,9 @@
+from collections import OrderedDict
+
 import peewee as pw
-from marshmallow import ValidationError, fields
+from marshmallow import ValidationError, compat, fields
 from marshmallow import validate as ma_validate
 
-from collections import OrderedDict
 from .fields import ForeignKey
 
 
@@ -99,6 +100,6 @@ def convert_value_validate(converter):
         try:
             converter(value)
         except Exception as e:
-            raise ValidationError(e.message)
+            raise ValidationError(compat.text_type(e))
 
     return validator
