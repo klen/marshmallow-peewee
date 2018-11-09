@@ -1,6 +1,6 @@
 __license__ = "MIT"
 __project__ = "Marshmallow-Peewee"
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 
 import marshmallow as ma
 
