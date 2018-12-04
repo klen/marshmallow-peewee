@@ -45,6 +45,7 @@ class ModelConverter(object):
     """ Convert Peewee model to Marshmallow schema."""
 
     TYPE_MAPPING = [
+        (pw.ForeignKeyField, ForeignKey),
         (pw.IntegerField, fields.Integer),
         (pw.FloatField, fields.Float),
         (pw.DecimalField, fields.Decimal),
@@ -55,7 +56,6 @@ class ModelConverter(object):
         (pw.DateField, fields.Date),
         (pw.TimeField, fields.Time),
         (pw.BooleanField, fields.Boolean),
-        (pw.ForeignKeyField, ForeignKey),
     ]
 
     def __init__(self, opts):
