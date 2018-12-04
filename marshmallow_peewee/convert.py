@@ -44,24 +44,19 @@ class ModelConverter(object):
 
     """ Convert Peewee model to Marshmallow schema."""
 
-    TYPE_MAPPING = {
-        pw.PrimaryKeyField: fields.Integer,
-        pw.IntegerField: fields.Integer,
-        pw.BigIntegerField: fields.Integer,
-        pw.SmallIntegerField: fields.Integer,
-        pw.FloatField: fields.Float,
-        pw.DoubleField: fields.Float,
-        pw.DecimalField: fields.Decimal,
-        pw.CharField: fields.String,
-        pw.FixedCharField: fields.String,
-        pw.TextField: fields.String,
-        pw.UUIDField: fields.UUID,
-        pw.DateTimeField: fields.DateTime,
-        pw.DateField: fields.Date,
-        pw.TimeField: fields.Time,
-        pw.BooleanField: fields.Boolean,
-        pw.ForeignKeyField: ForeignKey,
-    }
+    TYPE_MAPPING = [
+        (pw.IntegerField, fields.Integer),
+        (pw.FloatField, fields.Float),
+        (pw.DecimalField, fields.Decimal),
+        (pw.CharField, fields.String),
+        (pw.TextField, fields.String),
+        (pw.UUIDField, fields.UUID),
+        (pw.DateTimeField, fields.DateTime),
+        (pw.DateField, fields.Date),
+        (pw.TimeField, fields.Time),
+        (pw.BooleanField, fields.Boolean),
+        (pw.ForeignKeyField, ForeignKey),
+    ]
 
     def __init__(self, opts):
         self.opts = opts
@@ -99,8 +94,10 @@ class ModelConverter(object):
 
     def convert_default(self, field, **params):
         """Return raw field."""
-        ma_field = self.TYPE_MAPPING.get(type(field), fields.Raw)
-        return ma_field(**params)
+        for klass, ma_field in self.TYPE_MAPPING:
+            if isinstance(field, klass):
+                return ma_field(**params)
+        return fields.Raw(**params)
 
     def convert_PrimaryKeyField(self, field, required=False, **params):
         dump_only = self.opts.dump_only_pk
