@@ -12,7 +12,7 @@ class ModelConverter(object):
     """ Convert Peewee model to Marshmallow schema."""
 
     TYPE_MAPPING = [
-        (pw.AutoField, fields.String),
+        (pw.AutoField, fields.Integer),
         (pw.IntegerField, fields.Integer),
         (pw.CharField, fields.String),
         (pw.BooleanField, fields.Boolean),
@@ -83,7 +83,7 @@ class ModelConverter(object):
         return fields.Raw(**params)
 
     def convert_AutoField(self, field, required=False, **params):
-        return fields.String(dump_only=self.opts.dump_only_pk, required=False, **params)
+        return fields.Integer(dump_only=self.opts.dump_only_pk, required=False, **params)
 
     convert_BigAutoField = convert_AutoField
 

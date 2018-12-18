@@ -35,9 +35,9 @@ def test_schema(db):
     result, errors = UserSchema().dump(user)
     assert not errors
     assert result
-    assert result['id'] == '1'
+    assert result['id'] == 1
     assert result['name'] == 'Mike'
-    assert result['role'] == str(role.id)
+    assert result['role'] == role.id
     assert result['created'] > 100000
 
     result, errors = UserSchema().load(result)
@@ -75,12 +75,12 @@ def test_schema_related(db):
     result, errors = UserSchema().load(result)
     assert not errors
     assert isinstance(result, User)
-    assert result.id == '1'
+    assert result.id == 1
     assert isinstance(result.role, Role)
 
     result, errors = UserSchema().load({
         'name': 'Kevin',
-        'role': u'1'
+        'role': 1
     })
     assert not result.id
     assert result.role
