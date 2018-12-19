@@ -31,7 +31,7 @@ class ModelConverter(object):
     ]
 
     try:
-        TYPE_MAPPING.append(pw.BigAutoField, fields.String)
+        TYPE_MAPPING.append((pw.BigAutoField, fields.String))
     except AttributeError:
         pass
 

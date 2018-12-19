@@ -13,10 +13,15 @@ class Role(pw.Model):
         database = proxy
 
 
+class SubclassedCharField(pw.CharField):
+
+    pass
+
+
 class User(pw.Model):
 
     created = pw.DateTimeField(default=dt.datetime.now)
-    name = pw.CharField(255)
+    name = SubclassedCharField(255)
     title = pw.CharField(127, null=True)
     active = pw.BooleanField(default=True)
     rating = pw.IntegerField(default=0)
