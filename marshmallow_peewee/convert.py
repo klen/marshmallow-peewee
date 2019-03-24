@@ -61,8 +61,8 @@ class ModelConverter(object):
             choices = []
             labels = []
             for c in field.choices:
-                choices.append(c[0])
-                labels.append(c[1])
+                choices.append(c.value)
+                labels.append(c.name)
             params['validate'].append(ma_validate.OneOf(choices, labels))
 
         # use first "known" field class from field class mro
