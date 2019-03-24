@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from enum import Enum
 
 import peewee as pw
 from marshmallow import ValidationError, compat, fields
@@ -8,7 +9,6 @@ from .fields import ForeignKey
 
 
 class ModelConverter(object):
-
     """ Convert Peewee model to Marshmallow schema."""
 
     TYPE_MAPPING = [
@@ -61,8 +61,12 @@ class ModelConverter(object):
             choices = []
             labels = []
             for c in field.choices:
-                choices.append(c.value)
-                labels.append(c.name)
+                if isinstance(c, Enum):
+                    choices.append(c.value)
+                    labels.append(c.name)
+                else:
+                    choices.append(c[0])
+                    labels.append(c[1])
             params['validate'].append(ma_validate.OneOf(choices, labels))
 
         # use first "known" field class from field class mro
@@ -83,7 +87,8 @@ class ModelConverter(object):
         return fields.Raw(**params)
 
     def convert_AutoField(self, field, required=False, **params):
-        return fields.String(dump_only=self.opts.dump_only_pk, required=False, **params)
+        return fields.String(
+            dump_only=self.opts.dump_only_pk, required=False, **params)
 
     convert_BigAutoField = convert_AutoField
 
