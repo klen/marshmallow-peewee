@@ -47,7 +47,6 @@ class ModelConverter(object):
         return result
 
     def convert_field(self, field):
-                validate = [convert_value_validate(field.python_value)]
         params = {
             'allow_none': field.null,
             'attribute': field.name,
