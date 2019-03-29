@@ -47,18 +47,12 @@ class ModelConverter(object):
         return result
 
     def convert_field(self, field):
-        pw_fields = [x[0] for x in self.TYPE_MAPPING]
-        for f in pw_fields:
-            if isinstance(fields, f):
                 validate = [convert_value_validate(field.python_value)]
-                break
-        else:
-            validate = []
         params = {
             'allow_none': field.null,
             'attribute': field.name,
             'required': not field.null and field.default is None,
-            'validate': validate,
+            'validate': [convert_value_validate(field.db_value)],
         }
 
         if field.default is not None:
