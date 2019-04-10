@@ -1,10 +1,15 @@
 import datetime as dt
 
 from marshmallow import fields
-
-from marshmallow.compat import PY2, string_types
+from marshmallow.compat import PY2
 
 from . import MA_VERSION
+
+
+if PY2:
+    string_types = (str, unicode)
+else:
+    string_types = (str,)
 
 
 class Timestamp(fields.Field):
