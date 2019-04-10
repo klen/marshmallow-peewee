@@ -45,6 +45,19 @@ def test_schema(db):
     assert isinstance(result, User)
     assert result.name == 'Mike'
 
+    class UserSchema(ModelSchema):
+
+        created = MSTimestamp()
+
+        class Meta:
+            model = User
+            string_keys = False
+
+    result, errors = UserSchema().dump(user)
+    assert not errors
+    assert result
+    assert result['id'] == 1
+
 
 def test_schema_related(db):
     proxy.initialize(db)

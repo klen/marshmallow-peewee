@@ -151,6 +151,9 @@ Usage
             # dump_only_pk: Primary key is dump only
             # dump_only_pk = True
 
+            # string_keys: Convert keys to strings
+            # string_keys = True
+
 
 .. _bugtracker:
 

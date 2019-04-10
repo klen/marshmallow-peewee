@@ -1,10 +1,12 @@
 import datetime as dt
 
 from marshmallow import fields
-
-from marshmallow.compat import PY2, string_types
+from marshmallow.compat import PY2
 
 from . import MA_VERSION
+
+
+string_types = (str, unicode) if PY2 else (str,)  # noqa
 
 
 class Timestamp(fields.Field):
@@ -79,7 +81,7 @@ class ForeignKey(fields.Raw):
         def get_value(self, obj, attr, **kwargs):
             """Return the value for a given key from an object."""
             value = obj.__data__.get(attr)
-            if value is not None:
+            if self.root and self.root.opts.string_keys and value is not None:
                 value = str(value)
             return value
 
@@ -87,7 +89,7 @@ class ForeignKey(fields.Raw):
         def get_value(self, attr, obj, **kwargs):
             """Return the value for a given key from an object."""
             value = obj.__data__.get(attr)
-            if value is not None:
+            if self.root and self.root.opts.string_keys and value is not None:
                 value = str(value)
             return value
 
