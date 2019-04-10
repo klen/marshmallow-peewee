@@ -81,7 +81,7 @@ class ForeignKey(fields.Raw):
         def get_value(self, obj, attr, **kwargs):
             """Return the value for a given key from an object."""
             value = obj.__data__.get(attr)
-            if value is not None:
+            if self.root and self.root.opts.string_keys and value is not None:
                 value = str(value)
             return value
 
@@ -89,7 +89,7 @@ class ForeignKey(fields.Raw):
         def get_value(self, attr, obj, **kwargs):
             """Return the value for a given key from an object."""
             value = obj.__data__.get(attr)
-            if value is not None:
+            if self.root and self.root.opts.string_keys and value is not None:
                 value = str(value)
             return value
 

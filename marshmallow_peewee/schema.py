@@ -12,12 +12,15 @@ class SchemaOpts(ma.SchemaOpts):
         super(SchemaOpts, self).__init__(meta, **kwargs)
         self.model = getattr(meta, 'model', None)
         self.dump_only_pk = getattr(meta, 'dump_only_pk', True)
+        self.string_keys = getattr(meta, 'string_keys', True)
+
         if self.model and not issubclass(self.model, pw.Model):
             raise ValueError("`model` must be a subclass of peewee.Model")
+
         self.model_converter = getattr(meta, 'model_converter', ModelConverter)
 
 
-INHERITANCE_OPTIONS = 'model', 'model_converter', 'dump_only_pk'
+INHERITANCE_OPTIONS = 'model', 'model_converter', 'dump_only_pk', 'string_keys'
 
 
 class SchemaMeta(ma.schema.SchemaMeta):

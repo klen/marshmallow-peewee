@@ -83,7 +83,8 @@ class ModelConverter(object):
         return fields.Raw(**params)
 
     def convert_AutoField(self, field, required=False, **params):
-        return fields.String(dump_only=self.opts.dump_only_pk, required=False, **params)
+        ftype = fields.String if self.opts.string_keys else fields.Integer
+        return ftype(dump_only=self.opts.dump_only_pk, required=False, **params)
 
     convert_BigAutoField = convert_AutoField
 
