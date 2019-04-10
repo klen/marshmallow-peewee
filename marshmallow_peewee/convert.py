@@ -51,7 +51,7 @@ class ModelConverter(object):
             'allow_none': field.null,
             'attribute': field.name,
             'required': not field.null and field.default is None,
-            'validate': [convert_value_validate(field.python_value)],
+            'validate': [convert_value_validate(field.db_value)],
         }
 
         if field.default is not None:
