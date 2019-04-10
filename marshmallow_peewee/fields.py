@@ -6,10 +6,7 @@ from marshmallow.compat import PY2
 from . import MA_VERSION
 
 
-if PY2:
-    string_types = (str, unicode)
-else:
-    string_types = (str,)
+string_types = (str, unicode) if PY2 else (str,)  # noqa
 
 
 class Timestamp(fields.Field):
