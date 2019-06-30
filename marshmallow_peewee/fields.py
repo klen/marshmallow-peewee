@@ -1,7 +1,7 @@
 import datetime as dt
 
 from marshmallow import fields
-from marshmallow.compat import PY2
+from ._compact import PY2
 
 from . import MA_VERSION
 

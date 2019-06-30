@@ -1,7 +1,7 @@
 import marshmallow as ma
 import peewee as pw
 
-from marshmallow.compat import with_metaclass
+from ._compact import with_metaclass
 from .convert import ModelConverter
 from .fields import Related
 
@@ -65,7 +65,7 @@ class ModelSchema(with_metaclass(SchemaMeta, ma.Schema)):
         super(ModelSchema, self).__init__(**kwargs)
 
     @ma.post_load
-    def make_instance(self, data):
+    def make_instance(self, data, **kwargs):
         """Build object from data."""
         if not self.opts.model:
             return data
