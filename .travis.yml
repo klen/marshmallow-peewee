@@ -8,6 +8,8 @@ matrix:
       env: TOXENV=py36-m2
     - python: 3.6
       env: TOXENV=py36-m3
+    - python: 3.7
+      env: TOXENV=py37
 
 branches:
     only:
