@@ -5,7 +5,7 @@ from marshmallow import ValidationError, fields
 from marshmallow import validate as ma_validate
 
 from .fields import ForeignKey
-from . import _compact
+from . import _compat
 
 
 class ModelConverter(object):
@@ -102,6 +102,6 @@ def convert_value_validate(converter):
         try:
             converter(value)
         except Exception as e:
-            raise ValidationError(_compact.text_type(e))
+            raise ValidationError(_compat.text_type(e))
 
     return validator

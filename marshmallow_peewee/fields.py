@@ -1,7 +1,7 @@
 import datetime as dt
 
 from marshmallow import fields
-from ._compact import PY2
+from ._compat import PY2
 
 from . import MA_VERSION
 
@@ -24,12 +24,12 @@ class Timestamp(fields.Field):
 
     def _deserialize(self, value, attr, data, **kwargs):
         if not value:  # Falsy values, e.g. '', None, [] are not valid
-            raise self.fail('invalid')
+            raise self.make_error('invalid')
 
         try:
             return dt.datetime.utcfromtimestamp(float(value))
         except ValueError:
-            raise self.fail('invalid')
+            raise self.make_error('invalid')
 
 
 class MSTimestamp(Timestamp):
