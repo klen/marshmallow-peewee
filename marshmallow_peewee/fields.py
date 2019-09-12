@@ -15,6 +15,8 @@ class Timestamp(fields.Field):
         'invalid': 'Not a valid timestamp.'
     }
 
+    make_error_ = fields.Field.make_error if MA_VERSION > ['3'] else fields.Field.fail
+
     def _serialize(self, value, attr, obj, **kwargs):
         """Serialize given datetime to timestamp."""
         if value is None:
@@ -24,12 +26,12 @@ class Timestamp(fields.Field):
 
     def _deserialize(self, value, attr, data, **kwargs):
         if not value:  # Falsy values, e.g. '', None, [] are not valid
-            raise self.make_error('invalid')
+            raise self.make_error_('invalid')
 
         try:
             return dt.datetime.utcfromtimestamp(float(value))
         except ValueError:
-            raise self.make_error('invalid')
+            raise self.make_error_('invalid')
 
 
 class MSTimestamp(Timestamp):

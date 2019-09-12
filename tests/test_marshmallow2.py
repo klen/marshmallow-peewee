@@ -1,4 +1,5 @@
 import pytest
+import json
 import peewee as pw
 import datetime as dt
 import marshmallow as ma
@@ -178,3 +179,33 @@ def test_custom_converter(db):
     user = User.create(name='Mike', role=role)
     serialized = UserSchema().dump(user).data
     assert serialized['active'] is 1
+
+
+@pytest.mark.parametrize('created_val', [
+    '',
+    'i_am_not_a_number',
+])
+def test_field_error(db, created_val):
+    proxy.initialize(db)
+    db.create_tables([Role, User])
+
+    from marshmallow_peewee import ModelSchema, Timestamp
+
+    class UserSchema(ModelSchema):
+
+        created = Timestamp()
+
+        class Meta:
+            model = User
+
+    Role.create()
+
+    payload = {
+        "name": "Denis",
+        "role": "1",
+    }
+
+    payload['created'] = created_val
+
+    result, errors = UserSchema().loads(json.dumps(payload))
+    assert 'created' in errors
