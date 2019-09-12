@@ -1,5 +1,5 @@
 """
-Marshmallow-3 dropped support for Python-2.
+marshmallow 3 dropped support for Python 2.
 This file keeps backwards support for older MA versions.
 """
 
