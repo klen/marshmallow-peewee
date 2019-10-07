@@ -1,5 +1,5 @@
 -r requirements.txt
 -e .
 
-pytest==4.4.0
+pytest==5.2.1
 pytest-sugar==0.9.2
