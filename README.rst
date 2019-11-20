@@ -20,6 +20,11 @@ Marshmallow-Peewee
 
 Marshmallow-Peewee -- Peewee_ integration with the Marshmallow_ (de)serialization library.
 
+Dependency Note
+---------------
+
+For ``Marshmallow<3``/``Python<3`` please use ``Marshmallow-Peewee<3``.
+
 .. code-block:: python
 
     import peewee as pw
@@ -170,12 +175,6 @@ Contributing
 ============
 
 Development of The Marshmallow-Peewee happens at: https://github.com/klen/marshmallow-peewee
-
-
-Contributors
-=============
-
-* `Kirill Klenov <https://github.com/klen>`_
 
 .. _license:
 

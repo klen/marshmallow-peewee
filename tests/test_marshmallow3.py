@@ -7,10 +7,6 @@ import marshmallow as ma
 from .models import proxy, Role, User
 
 
-if ma.__version__.split('.') < ['3']:
-    pytest.skip('Skip tests for Marshmallow 3', allow_module_level=True)
-
-
 def test_schema(db):
     proxy.initialize(db)
     db.create_tables([Role, User])

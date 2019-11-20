@@ -1,7 +1,6 @@
 import marshmallow as ma
 import peewee as pw
 
-from ._compat import with_metaclass
 from .convert import ModelConverter
 from .fields import Related
 
@@ -56,7 +55,7 @@ class SchemaMeta(ma.schema.SchemaMeta):
         return declared_fields
 
 
-class ModelSchema(with_metaclass(SchemaMeta, ma.Schema)):
+class ModelSchema(ma.Schema, metaclass=SchemaMeta):
 
     OPTIONS_CLASS = SchemaOpts
 

@@ -1,12 +1,6 @@
 import datetime as dt
 
 from marshmallow import fields
-from ._compat import PY2
-
-from . import MA_VERSION
-
-
-string_types = (str, unicode) if PY2 else (str,)  # noqa
 
 
 class Timestamp(fields.Field):
@@ -14,8 +8,6 @@ class Timestamp(fields.Field):
     default_error_messages = {
         'invalid': 'Not a valid timestamp.'
     }
-
-    make_error_ = fields.Field.make_error if MA_VERSION > ['3'] else fields.Field.fail
 
     def _serialize(self, value, attr, obj, **kwargs):
         """Serialize given datetime to timestamp."""
@@ -26,12 +18,12 @@ class Timestamp(fields.Field):
 
     def _deserialize(self, value, attr, data, **kwargs):
         if not value:  # Falsy values, e.g. '', None, [] are not valid
-            raise self.make_error_('invalid')
+            raise self.make_error('invalid')
 
         try:
             return dt.datetime.utcfromtimestamp(float(value))
         except ValueError:
-            raise self.make_error_('invalid')
+            raise self.make_error('invalid')
 
 
 class MSTimestamp(Timestamp):
@@ -72,37 +64,22 @@ class Related(fields.Nested):
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
 
     def _deserialize(self, value, attr, data, **kwargs):
-        if isinstance(value, (int, string_types)):
+        if isinstance(value, str):
             return int(value)
+
         return super(Related, self)._deserialize(value, attr, data)
 
 
 class ForeignKey(fields.Raw):
 
-    if MA_VERSION > ['3']:
-        def get_value(self, obj, attr, **kwargs):
-            """Return the value for a given key from an object."""
-            value = obj.__data__.get(attr)
-            if self.root and self.root.opts.string_keys and value is not None:
-                value = str(value)
-            return value
-
-    else:
-        def get_value(self, attr, obj, **kwargs):
-            """Return the value for a given key from an object."""
-            value = obj.__data__.get(attr)
-            if self.root and self.root.opts.string_keys and value is not None:
-                value = str(value)
-            return value
+    def get_value(self, obj, attr, **kwargs):
+        """Return the value for a given key from an object."""
+        value = obj.__data__.get(attr)
+        if self.root and self.root.opts.string_keys and value is not None:
+            value = str(value)
+        return value
 
 
-if PY2:
-    def datetime_to_timestamp(dt_, epoch=dt.datetime(1970, 1, 1)):
-        """Convert given datetime object to timestamp in seconds."""
-        return (dt_ - epoch).total_seconds()
-
-else:
-
-    def datetime_to_timestamp(dt_):
-        """Convert given datetime object to timestamp in seconds."""
-        return dt_.replace(tzinfo=dt.timezone.utc).timestamp()
+def datetime_to_timestamp(dt_):
+    """Convert given datetime object to timestamp in seconds."""
+    return dt_.replace(tzinfo=dt.timezone.utc).timestamp()
