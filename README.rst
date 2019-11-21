@@ -93,6 +93,29 @@ For ``Marshmallow<3``/``Python<3`` please use ``Marshmallow-Peewee<3``.
     assert isinstance(result, User)
     assert isinstance(result.role, Role)
 
+
+    class UserSchema(ModelSchema):
+
+        role = StringRelatedField(deserialize=deserialize_role)
+
+        class Meta:
+            model = User
+
+    result = UserSchema().dump(user)
+    print(result)
+    # {'active': True,
+    #  'created': '2016-03-29T15:30:32.767483+00:00',
+    #  'id': 1,
+    #  'name': 'Mike',
+    #  'rating': 0,
+    #  'role': 'user',
+    #  'title': None}
+
+    result = UserSchema().load(result)
+    assert isinstance(result, User)
+    assert isinstance(result.role, str)
+
+
 .. _contents:
 
 .. contents::
@@ -114,7 +137,7 @@ Installation
 .. note::
 
     Marshmallow-Peewee>=2.0.0 supports only Peewee>=3.0.0. For Peewee<3.0.0
-    please use Marhmallow-Peewee==1.2.7
+    please use Marshmallow-Peewee==1.2.7
 
 .. _usage:
 
