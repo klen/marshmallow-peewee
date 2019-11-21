@@ -1,6 +1,6 @@
 import datetime as dt
 
-from marshmallow import fields
+from marshmallow import fields, ValidationError
 
 
 class Timestamp(fields.Field):
@@ -78,6 +78,35 @@ class ForeignKey(fields.Raw):
         if self.root and self.root.opts.string_keys and value is not None:
             value = str(value)
         return value
+
+
+class StringRelatedField(Related):
+
+    def __init__(self, deserialize=None, *args, **kwargs):
+        """
+        :param deserialize: A callable from which to retrieve the value.
+                            The function must take a two arguments, first model,
+                            which is the model of the deserialized type and
+                            value, which is the value to be deserialized.
+                            If no callable is provided then the field is read-only.
+        """
+        self._deserialize_function = deserialize
+        super(StringRelatedField, self).__init__(*args, **kwargs)
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        if self._deserialize_function is None:
+            raise AttributeError('"{}" is a read-only attribute and can not be serialized. '
+                                 'Use the "deserialize" attribute to enable deserialization.'
+                                 .format(attr))
+        model = self.schema.Meta.model
+        val = self._deserialize_function(model, value)
+        if not isinstance(val, model):
+            raise ValidationError('Deserialized object of "{}" is not of type {}'
+                                  .format(attr, model.__name__))
+        return val
+
+    def _serialize(self, nested_obj, attr, obj):
+        return str(nested_obj)
 
 
 def datetime_to_timestamp(dt_):

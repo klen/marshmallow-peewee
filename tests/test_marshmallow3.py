@@ -201,3 +201,59 @@ def test_field_error(db, created_val):
 
     with pytest.raises(ma.exceptions.ValidationError):
         UserSchema().loads(json.dumps(payload))
+
+
+def test_schema_string_related_field(db):
+    proxy.initialize(db)
+    db.create_tables([Role, User])
+
+    from marshmallow_peewee import ModelSchema, StringRelatedField
+
+    class UserSchemaReadOnly(ModelSchema):
+
+        role = StringRelatedField()
+
+        class Meta:
+            model = User
+            dump_only_pk = False
+            exclude = 'rating',
+
+    def deserialize_role_false(model, value):
+        return None
+
+    class UserSchemaFalseDeserializationType(UserSchemaReadOnly):
+        role = StringRelatedField(deserialize=deserialize_role_false)
+
+    def deserialize_role(model, value):
+        inst, _ = model.get_or_create(name=value)
+        return inst
+
+    class UserSchema(UserSchemaReadOnly):
+        role = StringRelatedField(deserialize=deserialize_role)
+
+    def __str__(self):
+        return self.name
+
+    # dynamically changing the behavior of the __str__ method
+    setattr(Role, '__str__', __str__)
+    role = Role.create()
+    user = User.create(name='Mike', role=role)
+
+    assert UserSchemaReadOnly._declared_fields['role'].attribute == 'role'
+
+    result = UserSchemaReadOnly().dump(user)
+    assert result
+    assert isinstance(result['role'], str)
+    assert result['role'] == 'user'
+    assert 'rating' not in result
+
+    with pytest.raises(AttributeError):
+        UserSchemaReadOnly().load(result)
+
+    with pytest.raises(ma.ValidationError):
+        UserSchemaFalseDeserializationType().load(result)
+
+    result = UserSchema().load(result)
+    assert isinstance(result, User)
+    assert result.id == '1'
+    assert isinstance(result.role, Role)
