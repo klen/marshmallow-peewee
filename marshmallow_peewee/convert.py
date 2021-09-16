@@ -15,10 +15,7 @@ class ModelConverter:
     """ Convert Peewee model to Marshmallow schema."""
 
     TYPE_MAPPING = [
-        (pw.AutoField, fields.String),
         (pw.IntegerField, fields.Integer),
-        (pw.CharField, fields.String),
-        (pw.BooleanField, fields.Boolean),
         (pw.DateTimeField, fields.DateTime),
         (pw.DateField, fields.Date),
         (pw.TextField, fields.String),
@@ -31,12 +28,13 @@ class ModelConverter:
         (pw.DoubleField, fields.Float),
         (pw.FixedCharField, fields.String),
         (pw.UUIDField, fields.UUID),
-    ]
 
-    try:
-        TYPE_MAPPING.append((pw.BigAutoField, fields.String))
-    except AttributeError:
-        pass
+        # Overrided
+        #  (pw.AutoField, fields.String),
+        #  (pw.BigAutoField, fields.String),
+        #  (pw.CharField, fields.String),
+        #  (pw.BooleanField, fields.Boolean),
+    ]
 
     def __init__(self, opts: SchemaOpts):
         self.opts = opts
@@ -73,7 +71,7 @@ class ModelConverter:
         # so that extended field classes get converted correctly
         for klass in field.__class__.mro():
             method = getattr(self, 'convert_' + klass.__name__, None)
-            if method or klass in self.TYPE_MAPPING:
+            if method:
                 break
 
         method = method or self.convert_default
