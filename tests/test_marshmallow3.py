@@ -201,3 +201,19 @@ def test_field_error(db, created_val):
 
     with pytest.raises(ma.exceptions.ValidationError):
         UserSchema().loads(json.dumps(payload))
+
+
+def test_string_fields():
+    from marshmallow_peewee import ModelSchema
+
+    class UserSchema(ModelSchema):
+
+        class Meta:
+            model = User
+            string_keys = False
+
+    user = User(id=1)
+    data = UserSchema().dump(user)
+    assert data
+    assert data['id'] == 1
+

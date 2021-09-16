@@ -1,32 +1,30 @@
-Marshmallow-Peewee
-##################
+# Marshmallow-Peewee
+
+Marshmallow-Peewee -- [Peewee ORM](https://github.com/coleifer/peewee)
+integration with the
+[Marshmallow](https://github.com/marshmallow-code/marshmallow)
+(de)serialization library.
+
+[![Tests Status](https://github.com/klen/marshmallow-peewee/workflows/tests/badge.svg)](https://github.com/klen/marshmallow-peewee/actions)
+[![PYPI Version](https://img.shields.io/pypi/v/marshmallow-peewee)](https://pypi.org/project/marshmallow-peewee/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/marshmallow-peewee)](https://pypi.org/project/marshmallow-peewee/)
 
 
-.. _badges:
+## Requirements
 
-.. image:: http://img.shields.io/travis/klen/marshmallow-peewee.svg?style=flat-square
-    :target: http://travis-ci.org/klen/marshmallow-peewee
-    :alt: Build Status
+* python >= 3.7
 
-.. image:: http://img.shields.io/pypi/v/marshmallow-peewee.svg?style=flat-square
-    :target: https://pypi.python.org/pypi/marshmallow-peewee
-    :alt: Version
+## Installation
 
-.. image:: http://img.shields.io/pypi/l/marshmallow-peewee.svg?style=flat-square
-    :target: https://pypi.python.org/pypi/marshmallow-peewee
-    :alt: License
+**marshmallow-peewee** should be installed using pip:
 
-.. _description:
+```shell
+$ pip install marshmallow-peewee
+```
 
-Marshmallow-Peewee -- Peewee_ integration with the Marshmallow_ (de)serialization library.
+### Quickstart
 
-Dependency Note
----------------
-
-For ``Marshmallow<3``/``Python<3`` please use ``Marshmallow-Peewee<3``.
-
-.. code-block:: python
-
+```python
     import peewee as pw
 
 
@@ -55,7 +53,7 @@ For ``Marshmallow<3``/``Python<3`` please use ``Marshmallow-Peewee<3``.
     role = Role.create()
     user = User.create(name='Mike', role=role)
 
-    result, errors = UserSchema().dump(user)
+    result = UserSchema().dump(user)
     print(result)
     # {'active': True,
     #  'created': '2016-03-29T15:27:18.600034+00:00',
@@ -65,7 +63,7 @@ For ``Marshmallow<3``/``Python<3`` please use ``Marshmallow-Peewee<3``.
     #  'role': 1,
     #  'title': None}
 
-    result, errors = UserSchema().load(result)
+    result = UserSchema().load(result)
     assert isinstance(result, User)
     assert result.name == 'Mike'
 
@@ -78,7 +76,7 @@ For ``Marshmallow<3``/``Python<3`` please use ``Marshmallow-Peewee<3``.
         class Meta:
             model = User
 
-    result, errors = UserSchema().dump(user)
+    result = UserSchema().dump(user)
     print(result)
     # {'active': True,
     #  'created': '2016-03-29T15:30:32.767483+00:00',
@@ -88,40 +86,14 @@ For ``Marshmallow<3``/``Python<3`` please use ``Marshmallow-Peewee<3``.
     #  'role': {'id': 5, 'name': 'user'},
     #  'title': None}
 
-    result, errors = UserSchema().load(result)
-    assert not errors
+    result = UserSchema().load(result)
     assert isinstance(result, User)
     assert isinstance(result.role, Role)
+```
 
-.. _contents:
+## Usage
 
-.. contents::
-
-Requirements
-=============
-
-- python 3.7+
-
-.. _installation:
-
-Installation
-=============
-
-**Marshmallow-Peewee** should be installed using pip: ::
-
-    pip install Marshmallow-Peewee
-
-.. note::
-
-    Marshmallow-Peewee>=2.0.0 supports only Peewee>=3.0.0. For Peewee<3.0.0
-    please use Marhmallow-Peewee==1.2.7
-
-.. _usage:
-
-Usage
-=====
-
-.. code-block:: python
+```python
 
     import peewee as pw
 
@@ -158,33 +130,20 @@ Usage
 
             # string_keys: Convert keys to strings
             # string_keys = True
+```
+
+## Bug tracker
+
+If you have any suggestions, bug reports or annoyances please report them to
+the issue tracker at https://github.com/klen/marshmallow-peewee/issues
 
 
-.. _bugtracker:
+## Contributing
 
-Bug tracker
-===========
+Development of the project happens at: https://github.com/klen/marshmallow-peewee
 
-If you have any suggestions, bug reports or
-annoyances please report them to the issue tracker
-at https://github.com/klen/marshmallow-peewee/issues
 
-.. _contributing:
+## License
 
-Contributing
-============
+Licensed under a [MIT License](http://opensource.org/licenses/MIT)
 
-Development of The Marshmallow-Peewee happens at: https://github.com/klen/marshmallow-peewee
-
-.. _license:
-
-License
-========
-
-Licensed under a MIT license (See LICENSE)
-
-.. _links:
-
-.. _klen: https://github.com/klen
-.. _Peewee: http://docs.peewee-orm.com/en/latest/
-.. _Marshmallow: https://marshmallow.readthedocs.org/en/latest/

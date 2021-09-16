@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+import typing as t
+
 from collections import OrderedDict
 
 import peewee as pw
@@ -7,8 +11,7 @@ from marshmallow import validate as ma_validate
 from .fields import ForeignKey
 
 
-class ModelConverter(object):
-
+class ModelConverter:
     """ Convert Peewee model to Marshmallow schema."""
 
     TYPE_MAPPING = [
@@ -35,18 +38,19 @@ class ModelConverter(object):
     except AttributeError:
         pass
 
-    def __init__(self, opts):
+    def __init__(self, opts: SchemaOpts):
         self.opts = opts
 
-    def fields_for_model(self, model):
+    def fields_for_model(self, model: pw.Model) -> OrderedDict:
         result = OrderedDict()
         for field in model._meta.sorted_fields:
             ma_field = self.convert_field(field)
             if ma_field:
                 result[field.name] = ma_field
+
         return result
 
-    def convert_field(self, field):
+    def convert_field(self, field: pw.Field) -> fields.Field:
         params = {
             'allow_none': field.null,
             'attribute': field.name,
@@ -75,28 +79,34 @@ class ModelConverter(object):
         method = method or self.convert_default
         return method(field, **params)
 
-    def convert_default(self, field, **params):
+    def convert_default(self, field: pw.Field, **params) -> fields.Field:
         """Return raw field."""
         for klass, ma_field in self.TYPE_MAPPING:
             if isinstance(field, klass):
                 return ma_field(**params)
         return fields.Raw(**params)
 
-    def convert_AutoField(self, field, required=False, **params):
+    def convert_AutoField(self, field: pw.Field, required: bool = False, **params) -> fields.Field:
         ftype = fields.String if self.opts.string_keys else fields.Integer
         return ftype(dump_only=self.opts.dump_only_pk, required=False, **params)
 
     convert_BigAutoField = convert_AutoField
 
-    def convert_CharField(self, field, validate=None, **params):
+    def convert_CharField(
+            self, field: pw.Field, validate: t.List = None, **params) -> fields.Field:
+        if validate is None:
+            validate = []
+
         validate += [ma_validate.Length(max=field.max_length)]
         return fields.String(validate=validate, **params)
 
-    def convert_BooleanField(self, field, validate=None, **params):
+    def convert_BooleanField(
+            self, field: pw.Field, validate: t.List = None, **params) -> fields.Field:
         return fields.Boolean(**params)
 
 
-def convert_value_validate(converter):
+def convert_value_validate(converter: t.Callable) -> t.Callable:
+
     def validator(value):
         try:
             converter(value)
@@ -104,3 +114,7 @@ def convert_value_validate(converter):
             raise ValidationError(str(e))
 
     return validator
+
+
+if t.TYPE_CHECKING:
+    from .schema import SchemaOpts

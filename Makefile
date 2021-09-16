@@ -60,3 +60,8 @@ $(VIRTUAL_ENV): setup.cfg
 # target: test - Run tests
 t test: $(VIRTUAL_ENV)
 	@$(VIRTUAL_ENV)/bin/pytest tests
+
+.PHONY: mypy
+# target: mypy - Run type checking
+mypy: $(VIRTUAL_ENV)
+	@$(VIRTUAL_ENV)/bin/mypy marshmallow_peewee

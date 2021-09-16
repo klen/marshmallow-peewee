@@ -1,3 +1,5 @@
+import typing as t
+
 import marshmallow as ma
 import peewee as pw
 
@@ -6,6 +8,10 @@ from .fields import Related
 
 
 class SchemaOpts(ma.SchemaOpts):
+
+    model: t.Optional[pw.Model]
+    dump_only_pk: bool
+    string_keys: bool
 
     def __init__(self, meta, **kwargs):
         super(SchemaOpts, self).__init__(meta, **kwargs)
@@ -59,12 +65,14 @@ class ModelSchema(ma.Schema, metaclass=SchemaMeta):
 
     OPTIONS_CLASS = SchemaOpts
 
-    def __init__(self, instance=None, **kwargs):
+    opts: SchemaOpts
+
+    def __init__(self, instance: pw.Model = None, **kwargs):
         self.instance = instance
         super(ModelSchema, self).__init__(**kwargs)
 
     @ma.post_load
-    def make_instance(self, data, **kwargs):
+    def make_instance(self, data: t.Dict, **kwargs) -> t.Union[t.Dict, pw.Model]:
         """Build object from data."""
         if not self.opts.model:
             return data
@@ -76,6 +84,7 @@ class ModelSchema(ma.Schema, metaclass=SchemaMeta):
 
         return self.opts.model(**data)
 
-    def load(self, data, instance=None, *args, **kwargs):
+    def load(self, data: t.Union[t.Mapping[str, t.Any], t.Iterable[t.Mapping[str, t.Any]]],
+             instance: pw.Model = None, *args, **kwargs):
         self.instance = instance or self.instance
         return super(ModelSchema, self).load(data, *args, **kwargs)
