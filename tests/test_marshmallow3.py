@@ -7,10 +7,13 @@ import marshmallow as ma
 from .models import proxy, Role, User
 
 
-def test_schema(db):
+@pytest.fixture(autouse=True)
+def setup(db):
     proxy.initialize(db)
     db.create_tables([Role, User])
 
+
+def test_schema():
     from marshmallow_peewee import ModelSchema, MSTimestamp
 
     class UserSchema(ModelSchema):
@@ -56,10 +59,7 @@ def test_schema(db):
     assert result['id'] == 1
 
 
-def test_schema_related(db):
-    proxy.initialize(db)
-    db.create_tables([Role, User], safe=True)
-
+def test_schema_related():
     from marshmallow_peewee import ModelSchema, Related
 
     class UserSchema(ModelSchema):
@@ -124,9 +124,6 @@ def test_schema_related(db):
 
 
 def tests_partition(db):
-    proxy.initialize(db)
-    db.create_tables([Role, User], safe=True)
-
     from marshmallow_peewee import ModelSchema
 
     class UserSchema(ModelSchema):
@@ -173,14 +170,8 @@ def test_custom_converter(db):
     assert serialized['active'] == 'True'
 
 
-@pytest.mark.parametrize('created_val', [
-    '',
-    'i_am_not_a_number',
-])
+@pytest.mark.parametrize('created_val', ['', 'i_am_not_a_number'])
 def test_field_error(db, created_val):
-    proxy.initialize(db)
-    db.create_tables([Role, User])
-
     from marshmallow_peewee import ModelSchema, Timestamp
 
     class UserSchema(ModelSchema):

@@ -56,9 +56,6 @@ class ModelConverter:
             'validate': [convert_value_validate(field.db_value)],
         }
 
-        if field.default is not None:
-            params['default'] = field.default
-
         if field.choices is not None:
             choices = []
             labels = []

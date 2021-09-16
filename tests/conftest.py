@@ -2,7 +2,7 @@ import pytest
 import peewee
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def db():
     from playhouse.db_url import connect
 
