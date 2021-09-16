@@ -2,8 +2,8 @@
 Credits
 =======
 
-Development Lead
-----------------
+Package maintainer
+------------------
 
 * Kirill Klenov <horneds@gmail.com>
 

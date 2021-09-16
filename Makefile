@@ -8,14 +8,6 @@ all: $(VIRTUAL_ENV)
 help:
 	@egrep "^# target:" [Mm]akefile
 
-.PHONY: clean
-# target: clean - Display callable targets
-clean:
-	rm -rf build/ dist/ docs/_build *.egg-info
-	find $(CURDIR) -name "*.py[co]" -delete
-	find $(CURDIR) -name "*.orig" -delete
-	find $(CURDIR)/$(MODULE) -name "__pycache__" | xargs rm -rf
-
 # ==============
 #  Bump version
 # ==============
@@ -47,11 +39,6 @@ major:
 #  Build package
 # ===============
 
-.PHONY: register
-# target: register - Register module on PyPi
-register:
-	@$(VIRTUAL_ENV)/bin/python setup.py register
-
 .PHONY: upload
 # target: upload - Upload module on PyPi
 upload: clean
@@ -64,23 +51,12 @@ upload: clean
 #  Development
 # =============
 
-$(VIRTUAL_ENV): requirements.txt
+$(VIRTUAL_ENV): setup.cfg
 	@[ -d $(VIRTUAL_ENV) ] || virtualenv --python=python3 $(VIRTUAL_ENV)
-	@$(VIRTUAL_ENV)/bin/pip install -r requirements.txt
+	@$(VIRTUAL_ENV)/bin/pip install -e .[tests]
 	@touch $(VIRTUAL_ENV)
 
-$(VIRTUAL_ENV)/bin/py.test: $(VIRTUAL_ENV) requirements-tests.txt
-	@$(VIRTUAL_ENV)/bin/pip install -r requirements-tests.txt
-	@touch $(VIRTUAL_ENV)/bin/py.test
-
-.PHONY: test
+.PHONY: t test
 # target: test - Run tests
-test: $(VIRTUAL_ENV)/bin/py.test
-	@$(VIRTUAL_ENV)/bin/py.test tests
-
-.PHONY: t
-t: test
-
-.PHONY: run
-run: $(VIRTUAL_ENV)
-	$(VIRTUAL_ENV)/bin/python -m example
+t test: $(VIRTUAL_ENV)
+	@$(VIRTUAL_ENV)/bin/pytest tests

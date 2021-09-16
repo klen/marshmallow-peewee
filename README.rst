@@ -100,7 +100,7 @@ For ``Marshmallow<3``/``Python<3`` please use ``Marshmallow-Peewee<3``.
 Requirements
 =============
 
-- python 2.7+,3.4+
+- python 3.7+
 
 .. _installation:
 
