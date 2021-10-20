@@ -207,3 +207,4 @@ def test_string_fields():
     data = UserSchema().dump(user)
     assert data
     assert data['id'] == 1
+

@@ -1,3 +1,8 @@
+2021-10-20  klen
+
+	* Support python 3.10
+	* Take `ma_field.load_default` from `pw_field.default`
+
 2021-09-16  klen
 
 	* Support only python 3.7+
