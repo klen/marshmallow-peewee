@@ -1,4 +1,4 @@
-__version__ = "3.2.0"
+__version__ = "3.2.1"
 
 from .schema import ModelSchema
 from .fields import Timestamp, MSTimestamp, Related, ForeignKey
