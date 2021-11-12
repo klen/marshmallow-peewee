@@ -33,8 +33,7 @@ class Timestamp(fields.Field):
 
 class MSTimestamp(Timestamp):
 
-    def _serialize(
-            self, value: dt.datetime, attr: str, obj: pw.Model, **kwargs) -> t.Optional[int]:
+    def _serialize(self, value: dt.datetime, attr: str, obj: pw.Model, *_, **__) -> t.Optional[int]:
         """Serialize given datetime to timestamp."""
         val = super(MSTimestamp, self)._serialize(value, attr, obj)
         if val is None:
@@ -43,7 +42,7 @@ class MSTimestamp(Timestamp):
         return val * 1000
 
     def _deserialize(self, value: t.Union[str, int, float], attr: t.Optional[str],
-                     data: t.Optional[t.Mapping[str, t.Any]], **kwargs) -> dt.datetime:
+                     data: t.Optional[t.Mapping[str, t.Any]], **_) -> dt.datetime:
         if value:
             value = int(value) / 1e3
 
@@ -60,9 +59,9 @@ class Related(fields.Nested):
     def init_model(self, model: pw.Model, name: str):
         from .schema import ModelSchema
 
-        field = model._meta.fields.get(name)
+        field = model._meta.fields.get(name)  # type: ignore
         if not field:
-            field = getattr(model, name, None).field
+            field = getattr(model, name).field
             self.many = True
             rel_model = field.model
         else:
@@ -74,7 +73,10 @@ class Related(fields.Nested):
         meta = type('Meta', (), self.meta)
         self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
 
-    def _deserialize(self, value, attr, data, **kwargs):
+    def _deserialize(self, value, attr, data, **_):
+        if self.field is None:
+            raise RuntimeError('Init model first.')
+
         if not isinstance(value, dict):
             return self.field.rel_field.python_value(value)
 
@@ -83,7 +85,7 @@ class Related(fields.Nested):
 
 class ForeignKey(fields.Raw):
 
-    def get_value(self, obj: pw.Model, attr: str, **kwargs) -> t.Any:  # type: ignore
+    def get_value(self, obj: pw.Model, attr: str, **_) -> t.Any:  # type: ignore
         """Return the value for a given key from an object."""
         value = obj.__data__.get(attr)
         if self.root and self.root.opts.string_keys and value is not None:

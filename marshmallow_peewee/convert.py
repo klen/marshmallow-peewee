@@ -72,6 +72,7 @@ class ModelConverter:
 
         # use first "known" field class from field class mro
         # so that extended field classes get converted correctly
+        method = None
         for klass in field.__class__.mro():
             method = getattr(self, 'convert_' + klass.__name__, None)
             if method:
@@ -94,7 +95,7 @@ class ModelConverter:
     convert_BigAutoField = convert_AutoField
 
     def convert_CharField(
-            self, field: pw.Field, validate: t.List = None, **params) -> fields.Field:
+            self, field: pw.CharField, validate: t.List = None, **params) -> fields.Field:
         if validate is None:
             validate = []
 

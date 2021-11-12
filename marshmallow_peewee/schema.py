@@ -9,7 +9,7 @@ from .fields import Related
 
 class SchemaOpts(ma.SchemaOpts):
 
-    model: t.Optional[pw.Model]
+    model: t.Optional[t.Type[pw.Model]]
     dump_only_pk: bool
     string_keys: bool
 
@@ -72,7 +72,7 @@ class ModelSchema(ma.Schema, metaclass=SchemaMeta):
         super(ModelSchema, self).__init__(**kwargs)
 
     @ma.post_load
-    def make_instance(self, data: t.Dict, **kwargs) -> t.Union[t.Dict, pw.Model]:
+    def make_instance(self, data: t.Dict, **_) -> t.Union[t.Dict, pw.Model]:
         """Build object from data."""
         if not self.opts.model:
             return data
