@@ -130,6 +130,22 @@ $ pip install marshmallow-peewee
 
             # string_keys: Convert keys to strings
             # string_keys = True
+
+            # id_keys: serialize (and deserialize) ForeignKey fields with _id suffix
+            # id_keys = False
+```
+
+You may set global options for `marshmallow-peewee`:
+
+```python
+
+from marshmallow_peewee import setup
+
+setup(id_keys=True, string_keys=False)  # Set options for all schemas
+
+class UserSchema(ModelSchema):
+  # ...
+
 ```
 
 ## Bug tracker

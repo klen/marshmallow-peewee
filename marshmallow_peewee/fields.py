@@ -10,7 +10,7 @@ class Timestamp(fields.Field):
     default_error_messages = {"invalid": "Not a valid timestamp."}
 
     def _serialize(
-        self, value: dt.datetime, attr: str, obj: pw.Model, **kwargs
+        self, value: dt.datetime, attr: t.Optional[str], obj: pw.Model, **kwargs
     ) -> t.Optional[int]:
         """Serialize given datetime to timestamp."""
         if value is None:
@@ -23,7 +23,7 @@ class Timestamp(fields.Field):
         value: t.Union[str, int, float],
         attr: t.Optional[str],
         data: t.Optional[t.Mapping[str, t.Any]],
-        **kwargs
+        **kwargs,
     ) -> dt.datetime:
         if not value:  # Falsy values, e.g. '', None, [] are not valid
             raise self.make_error("invalid")
@@ -36,7 +36,7 @@ class Timestamp(fields.Field):
 
 class MSTimestamp(Timestamp):
     def _serialize(
-        self, value: dt.datetime, attr: str, obj: pw.Model, *_, **__
+        self, value: dt.datetime, attr: t.Optional[str], obj: pw.Model, *_, **__
     ) -> t.Optional[int]:
         """Serialize given datetime to timestamp."""
         val = super(MSTimestamp, self)._serialize(value, attr, obj)
@@ -50,7 +50,7 @@ class MSTimestamp(Timestamp):
         value: t.Union[str, int, float],
         attr: t.Optional[str],
         data: t.Optional[t.Mapping[str, t.Any]],
-        **_
+        **_,
     ) -> dt.datetime:
         if value:
             value = int(value) / 1e3
@@ -92,9 +92,15 @@ class Related(fields.Nested):
 
 
 class ForeignKey(fields.Raw):
+    string_keys = False
+
+    def _bind_to_schema(self, field_name, schema):
+        self.string_keys = schema.opts.string_keys
+        super()._bind_to_schema(field_name, schema)
+
     def get_value(self, obj: pw.Model, attr: str, **_) -> t.Any:  # type: ignore
         """Return the value for a given key from an object."""
-        value = obj.__data__.get(attr)
-        if self.root and self.root.opts.string_keys and value is not None:
+        value = obj.__data__.get(self.attribute)
+        if value is not None and self.string_keys:
             value = str(value)
         return value
