@@ -1,39 +1,43 @@
+import datetime as dt
 import typing as t
 
-import datetime as dt
 import peewee as pw
-
-from marshmallow import fields, Schema
+from marshmallow import Schema, fields
 
 
 class Timestamp(fields.Field):
 
-    default_error_messages = {
-        'invalid': 'Not a valid timestamp.'
-    }
+    default_error_messages = {"invalid": "Not a valid timestamp."}
 
     def _serialize(
-            self, value: dt.datetime, attr: str, obj: pw.Model, **kwargs) -> t.Optional[int]:
+        self, value: dt.datetime, attr: str, obj: pw.Model, **kwargs
+    ) -> t.Optional[int]:
         """Serialize given datetime to timestamp."""
         if value is None:
             return None
 
-        return int(datetime_to_timestamp(value))
+        return int(value.timestamp())
 
-    def _deserialize(self, value: t.Union[str, int, float], attr: t.Optional[str],
-                     data: t.Optional[t.Mapping[str, t.Any]], **kwargs) -> dt.datetime:
+    def _deserialize(
+        self,
+        value: t.Union[str, int, float],
+        attr: t.Optional[str],
+        data: t.Optional[t.Mapping[str, t.Any]],
+        **kwargs
+    ) -> dt.datetime:
         if not value:  # Falsy values, e.g. '', None, [] are not valid
-            raise self.make_error('invalid')
+            raise self.make_error("invalid")
 
         try:
             return dt.datetime.utcfromtimestamp(float(value))
         except ValueError:
-            raise self.make_error('invalid')
+            raise self.make_error("invalid")
 
 
 class MSTimestamp(Timestamp):
-
-    def _serialize(self, value: dt.datetime, attr: str, obj: pw.Model, *_, **__) -> t.Optional[int]:
+    def _serialize(
+        self, value: dt.datetime, attr: str, obj: pw.Model, *_, **__
+    ) -> t.Optional[int]:
         """Serialize given datetime to timestamp."""
         val = super(MSTimestamp, self)._serialize(value, attr, obj)
         if val is None:
@@ -41,8 +45,13 @@ class MSTimestamp(Timestamp):
 
         return val * 1000
 
-    def _deserialize(self, value: t.Union[str, int, float], attr: t.Optional[str],
-                     data: t.Optional[t.Mapping[str, t.Any]], **_) -> dt.datetime:
+    def _deserialize(
+        self,
+        value: t.Union[str, int, float],
+        attr: t.Optional[str],
+        data: t.Optional[t.Mapping[str, t.Any]],
+        **_
+    ) -> dt.datetime:
         if value:
             value = int(value) / 1e3
 
@@ -50,7 +59,6 @@ class MSTimestamp(Timestamp):
 
 
 class Related(fields.Nested):
-
     def __init__(self, nested: Schema = None, meta: t.Dict = None, **kwargs):  # type: ignore
         self.field = None
         self.meta = meta or {}
@@ -69,13 +77,13 @@ class Related(fields.Nested):
 
         self.field = field
         self.attribute = self.attribute or name
-        self.meta['model'] = rel_model
-        meta = type('Meta', (), self.meta)
-        self.nested = type('Schema', (ModelSchema,), {'Meta': meta})
+        self.meta["model"] = rel_model
+        meta = type("Meta", (), self.meta)
+        self.nested = type("Schema", (ModelSchema,), {"Meta": meta})
 
     def _deserialize(self, value, attr, data, **_):
         if self.field is None:
-            raise RuntimeError('Init model first.')
+            raise RuntimeError("Init model first.")
 
         if not isinstance(value, dict):
             return self.field.rel_field.python_value(value)
@@ -84,15 +92,9 @@ class Related(fields.Nested):
 
 
 class ForeignKey(fields.Raw):
-
     def get_value(self, obj: pw.Model, attr: str, **_) -> t.Any:  # type: ignore
         """Return the value for a given key from an object."""
         value = obj.__data__.get(attr)
         if self.root and self.root.opts.string_keys and value is not None:
             value = str(value)
         return value
-
-
-def datetime_to_timestamp(dt_: dt.datetime) -> float:
-    """Convert given datetime object to timestamp in seconds."""
-    return dt_.replace(tzinfo=dt.timezone.utc).timestamp()
