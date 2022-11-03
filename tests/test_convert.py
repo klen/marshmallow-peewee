@@ -1,13 +1,13 @@
-import pytest
 import marshmallow as ma
+import pytest
 
 from .models import User
 
 
 @pytest.fixture
 def convertor():
-    from marshmallow_peewee.schema import SchemaOpts
     from marshmallow_peewee.convert import ModelConverter
+    from marshmallow_peewee.schema import SchemaOpts
 
     class Meta:
         model = User
@@ -20,3 +20,5 @@ def test_boolean(convertor):
     assert ma_field
     assert isinstance(ma_field, ma.fields.Boolean)
     assert ma_field.load_default is True
+    assert ma_field.metadata
+    assert ma_field.metadata["help_text"] == "Is user active"

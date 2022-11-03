@@ -72,6 +72,9 @@ class ModelConverter:
                 labels.append(c[1])
             params["validate"].append(ma_validate.OneOf(choices, labels))
 
+        if field.help_text:
+            params["metadata"] = {"help_text": field.help_text}
+
         # use first "known" field class from field class mro
         # so that extended field classes get converted correctly
         method = None
