@@ -21,4 +21,4 @@ def test_boolean(convertor):
     assert isinstance(ma_field, ma.fields.Boolean)
     assert ma_field.load_default is True
     assert ma_field.metadata
-    assert ma_field.metadata["help_text"] == "Is user active"
+    assert ma_field.metadata["description"] == "Is user active"
