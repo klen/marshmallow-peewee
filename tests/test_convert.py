@@ -1,5 +1,8 @@
 import marshmallow as ma
+import peewee as pw
 import pytest
+
+from marshmallow_peewee.fields import ForeignKey
 
 from .models import User
 
@@ -22,3 +25,11 @@ def test_boolean(convertor):
     assert ma_field.load_default is True
     assert ma_field.metadata
     assert ma_field.metadata["description"] == "Is user active"
+
+
+def test_deferred(convertor):
+    class Test(pw.Model):
+        user = pw.DeferredForeignKey("Child")
+
+    ma_field = convertor.convert_field(Test.user)
+    assert isinstance(ma_field, ForeignKey)

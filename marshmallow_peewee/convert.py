@@ -19,6 +19,7 @@ class ModelConverter:
         (pw.DateField, fields.Date),
         (pw.TextField, fields.String),
         (pw.ForeignKeyField, ForeignKey),
+        (pw.DeferredForeignKey, ForeignKey),
         (pw.FloatField, fields.Float),
         (pw.DecimalField, fields.Decimal),
         (pw.TimeField, fields.Time),
