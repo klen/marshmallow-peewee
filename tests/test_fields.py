@@ -12,21 +12,34 @@ def setup(db):
 
 
 def test_timestamp():
-    from marshmallow_peewee import ModelSchema, Timestamp
+    from marshmallow_peewee import Timestamp
 
-    class UserSchema(ModelSchema):
+    user = User(name="Mike", created=datetime(2014, 1, 1, tzinfo=timezone.utc))
 
-        created = Timestamp()
+    ts = user.created.timestamp()
 
-        class Meta:
-            model = User
+    field = Timestamp()
+    test = field.serialize("created", user)
+    assert test == user.created.timestamp() == ts
+
+    test = field.deserialize(test)
+    assert (
+        test.replace(tzinfo=timezone.utc).timestamp() == user.created.timestamp() == ts
+    )
+
+
+def test_timestamp_with_tz():
+    from marshmallow_peewee import Timestamp
 
     tz = timezone(timedelta(hours=3))
     user = User(name="Mike", created=datetime(2014, 1, 1, tzinfo=tz))
 
-    schema = UserSchema()
-    data = schema.dump(user)
-    assert data["created"] == user.created.timestamp()
+    field = Timestamp()
+    test = field.serialize("created", user)
+    assert test == user.created.timestamp()
+
+    test = field.deserialize(test)
+    assert test == user.created.astimezone(timezone.utc).replace(tzinfo=None)
 
 
 def test_related():

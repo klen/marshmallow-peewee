@@ -16,6 +16,9 @@ class Timestamp(fields.Field):
         if value is None:
             return None
 
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=dt.timezone.utc)
+
         return int(value.timestamp())
 
     def _deserialize(
