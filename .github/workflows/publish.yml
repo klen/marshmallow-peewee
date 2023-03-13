@@ -19,7 +19,7 @@ jobs:
 
   notify:
     runs-on: ubuntu-latest
-    needs: release
+    needs: build
     steps:
 
     - name: Notify Success
@@ -30,4 +30,3 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_TOKEN }}
           slack-optional-as_user: false
           slack-optional-icon_emoji: ":white_check_mark:"
-
