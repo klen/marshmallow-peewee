@@ -39,6 +39,9 @@ pytest-mypy = "*"
 packages = ["marshmallow_peewee"]
 ignore_missing_imports = true
 
+[tool.pytest.ini_options]
+addopts = "--mypy -xvs"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

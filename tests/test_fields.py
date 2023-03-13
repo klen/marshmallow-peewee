@@ -1,13 +1,12 @@
-from datetime import datetime, timedelta, timezone, tzinfo
+from __future__ import annotations
 
-import marshmallow as ma
 import pytest
 
 from .models import Role, User, proxy
 
 
 @pytest.fixture(autouse=True)
-def setup(db):
+def _setup(db):
     proxy.initialize(db)
     db.create_tables([Role, User])
 

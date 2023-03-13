@@ -6,7 +6,11 @@ from .models import User
 def test_string_fields():
     from marshmallow_peewee import ModelSchema
 
-    class UserSchema(ModelSchema):
+    class BaseSchema(ModelSchema):
+        class Meta:
+            datetimeformat = "timestamp"
+
+    class UserSchema(BaseSchema):
         class Meta:
             model = User
             string_keys = False
@@ -15,3 +19,4 @@ def test_string_fields():
     data = UserSchema().dump(user)
     assert data
     assert data["id"] == 1
+    assert isinstance(data["created"], float)

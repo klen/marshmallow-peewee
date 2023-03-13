@@ -35,6 +35,10 @@ INHERITANCE_OPTIONS = (
     "model_converter",
     "dump_only_pk",
     "string_keys",
+    # Basic options
+    "datetimeformat",
+    "dateformat",
+    "timeformat",
 )
 
 
