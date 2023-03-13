@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "marshmallow-peewee"
+version = "3.4.3"
+description = "Peewee ORM integration with the Marshmallow (de)serialization library"
+authors = ["Kirill Klenov <horneds@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/klen/marshmallow-peewee"
+repository = "https://github.com/klen/marshmallow-peewee"
+keywords = ["marshmallow", "peewee", "orm", "serialization", "deserialization"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+packages = [
+    { include = "marshmallow_peewee" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+marshmallow = "^3.0.0"
+peewee = "^3.14.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "*"
+
+[tool.poetry.group.tests.dependencies]
+pytest = "*"
+pytest-mypy = "*"
+
+[tool.mypy]
+packages = ["marshmallow_peewee"]
+ignore_missing_imports = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

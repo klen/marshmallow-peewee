@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime as dt
 
 import peewee as pw
@@ -13,12 +15,10 @@ class Role(pw.Model):
 
 
 class SubclassedCharField(pw.CharField):
-
     pass
 
 
 class User(pw.Model):
-
     created = pw.DateTimeField(default=dt.datetime.now)
     name = SubclassedCharField(255)
     title = pw.CharField(127, null=True)

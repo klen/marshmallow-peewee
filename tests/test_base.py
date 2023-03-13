@@ -1,4 +1,5 @@
-import datetime as dt
+from __future__ import annotations
+
 import json
 
 import marshmallow as ma
@@ -9,17 +10,16 @@ from .models import Role, User, proxy
 
 
 @pytest.fixture(autouse=True)
-def setup(db):
+def _setup(db):
     proxy.initialize(db)
     db.create_tables([Role, User])
 
 
 def test_schema():
-    from marshmallow_peewee import ModelSchema, MSTimestamp
+    from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(ModelSchema):
-
-        created = MSTimestamp()
+    class UserSchema(BaseSchema):
+        created = ma.fields.DateTime("timestamp_ms")
 
         class Meta:
             model = User
@@ -43,13 +43,12 @@ def test_schema():
     assert isinstance(result, User)
     assert result.name == "Mike"
 
-    class ModelSchema_(ModelSchema):
+    class ModelSchema(BaseSchema):
         class Meta:
             string_keys = False
 
-    class UserSchema(ModelSchema_):
-
-        created = MSTimestamp()
+    class UserSchema(ModelSchema):
+        created = ma.fields.DateTime("timestamp_ms")
 
         class Meta:
             model = User
@@ -60,10 +59,10 @@ def test_schema():
 
 
 def test_schema_related():
-    from marshmallow_peewee import ModelSchema, Related
+    from marshmallow_peewee import ModelSchema as BaseSchema
+    from marshmallow_peewee import Related
 
-    class UserSchema(ModelSchema):
-
+    class UserSchema(BaseSchema):
         role = Related(unknown=ma.EXCLUDE)
 
         class Meta:
@@ -90,13 +89,12 @@ def test_schema_related():
     assert not result.id
     assert result.role
 
-    class RoleSchema(ModelSchema):
+    class RoleSchema(BaseSchema):
         class Meta:
             model = Role
             fields = ("id",)
 
-    class UserSchema(ModelSchema):
-
+    class UserSchema(BaseSchema):
         role = Related(RoleSchema)
 
         class Meta:
@@ -107,8 +105,7 @@ def test_schema_related():
     assert result
     assert "name" not in result["role"]
 
-    class RoleSchema(ModelSchema):
-
+    class RoleSchema(BaseSchema):
         user_set = Related()
 
         class Meta:
@@ -120,9 +117,9 @@ def test_schema_related():
 
 
 def tests_partition(db):
-    from marshmallow_peewee import ModelSchema
+    from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(ModelSchema):
+    class UserSchema(BaseSchema):
         class Meta:
             model = User
 
@@ -135,25 +132,24 @@ def tests_partition(db):
 
 
 def test_custom_converter(db):
-    from marshmallow_peewee import ModelSchema, Related
-    from marshmallow_peewee.convert import ModelConverter
-
-    class CustomModelConverter(ModelConverter):
-        def convert_BooleanField(self, field, **params):
-            return ma.fields.String(**params)
+    from marshmallow_peewee import DefaultConverter
+    from marshmallow_peewee import ModelSchema as BaseSchema
 
     proxy.initialize(db)
     db.create_tables([Role, User], safe=True)
 
-    class CustomModelSchema(ModelSchema):
-        class Meta:
-            model_converter = CustomModelConverter
+    class CustomConverter(DefaultConverter):
+        pass
 
-    class UserSchema(CustomModelSchema):
+    CustomConverter.register(pw.BooleanField, ma.fields.String)
+
+    class CustomSchema(BaseSchema):
+        class Meta:
+            model_converter = CustomConverter
+
+    class UserSchema(CustomSchema):
         class Meta:
             model = User
-
-    assert UserSchema.opts.model_converter is CustomModelConverter
 
     role = Role.create()
     user = User.create(name="Mike", role=role)
@@ -163,11 +159,10 @@ def test_custom_converter(db):
 
 @pytest.mark.parametrize("created_val", ["", "i_am_not_a_number"])
 def test_field_error(db, created_val):
-    from marshmallow_peewee import ModelSchema, Timestamp
+    from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(ModelSchema):
-
-        created = Timestamp()
+    class UserSchema(BaseSchema):
+        created = ma.fields.DateTime("timestamp")
 
         class Meta:
             model = User
@@ -186,9 +181,9 @@ def test_field_error(db, created_val):
 
 
 def test_string_fields():
-    from marshmallow_peewee import ModelSchema
+    from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(ModelSchema):
+    class UserSchema(BaseSchema):
         class Meta:
             model = User
             string_keys = False
@@ -200,9 +195,9 @@ def test_string_fields():
 
 
 def test_id_keys():
-    from marshmallow_peewee import ModelSchema
+    from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(ModelSchema):
+    class UserSchema(BaseSchema):
         class Meta:
             model = User
             id_keys = True

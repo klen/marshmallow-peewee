@@ -1,19 +1,21 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Iterable, Mapping, Optional, Type, Union
 
 import marshmallow as ma
 import peewee as pw
 
-from . import DEFAULTS
-from .convert import ModelConverter
+from .convert import DefaultConverter
 from .fields import Related
+from .opts import DEFAULTS
 
 
 class SchemaOpts(ma.SchemaOpts):
-
     model: Optional[Type[pw.Model]]
     dump_only_pk: bool
     string_keys: bool
     id_keys: bool
+    model_converter: Type[DefaultConverter]
 
     def __init__(self, meta, **kwargs):
         super(SchemaOpts, self).__init__(meta, **kwargs)
@@ -25,14 +27,19 @@ class SchemaOpts(ma.SchemaOpts):
         if self.model and not issubclass(self.model, pw.Model):
             raise ValueError("`model` must be a subclass of peewee.Model")
 
-        self.model_converter = getattr(meta, "model_converter", ModelConverter)
+        self.model_converter = getattr(meta, "model_converter", DefaultConverter)
 
 
-INHERITANCE_OPTIONS = "model", "model_converter", "dump_only_pk", "string_keys"
+INHERITANCE_OPTIONS = (
+    "model",
+    "model_converter",
+    "dump_only_pk",
+    "string_keys",
+)
 
 
 class SchemaMeta(ma.schema.SchemaMeta):
-    def __new__(mcs, name, bases, attrs):
+    def __new__(cls, name, bases, attrs):
         """Support inheritance for model and model_converter Meta options."""
         if "Meta" in attrs and bases:
             meta = attrs["Meta"]
@@ -42,14 +49,17 @@ class SchemaMeta(ma.schema.SchemaMeta):
                     continue
                 setattr(meta, option, getattr(base_meta, option))
 
-        return super(SchemaMeta, mcs).__new__(mcs, name, bases, attrs)
+        return super(SchemaMeta, cls).__new__(cls, name, bases, attrs)
 
     @classmethod
-    def get_declared_fields(mcs, klass, cls_fields, inherited_fields, dict_cls):
+    def get_declared_fields(cls, klass, cls_fields, inherited_fields, dict_cls):
         declared_fields = dict_cls()
-        opts = klass.opts
-        base_fields = super(SchemaMeta, mcs).get_declared_fields(
-            klass, cls_fields, inherited_fields, dict_cls
+        opts: SchemaOpts = klass.opts
+        base_fields = super(SchemaMeta, cls).get_declared_fields(
+            klass,
+            cls_fields,
+            inherited_fields,
+            dict_cls,
         )
         model = getattr(opts, "model", None)
         if model:
@@ -57,14 +67,15 @@ class SchemaMeta(ma.schema.SchemaMeta):
                 if isinstance(field, Related) and field.nested is None:
                     field.init_model(model, name)
 
-            converter = opts.model_converter(opts=opts)
-            declared_fields.update(converter.fields_for_model(model))
+            converter = opts.model_converter(
+                opts=opts,
+            )
+            declared_fields.update(converter.get_fields(model))
         declared_fields.update(base_fields)
         return declared_fields
 
 
 class ModelSchema(ma.Schema, metaclass=SchemaMeta):
-
     OPTIONS_CLASS = SchemaOpts
 
     opts: SchemaOpts
@@ -91,7 +102,7 @@ class ModelSchema(ma.Schema, metaclass=SchemaMeta):
         data: Union[Mapping[str, Any], Iterable[Mapping[str, Any]]],
         instance: pw.Model = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         self.instance = instance or self.instance
         return super(ModelSchema, self).load(data, *args, **kwargs)

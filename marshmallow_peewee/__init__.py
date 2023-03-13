@@ -1,18 +1,16 @@
-__version__ = "3.4.3"
+from __future__ import annotations
 
-DEFAULTS = {
-    "dump_only_pk": True,
-    "string_keys": True,
-    "id_keys": False,
-}
-
-from .fields import ForeignKey, MSTimestamp, Related, Timestamp
+from .convert import DefaultConverter
+from .fields import ForeignKey, Related
+from .opts import setup
 from .schema import ModelSchema
 
-
-def setup(**options):
-    """Setup marshmallow-peewee defaults."""
-    DEFAULTS.update(options)
-
-
-__all__ = "ModelSchema", "Timestamp", "MSTimestamp", "Related", "ForeignKey", "setup"
+__all__ = (
+    "ModelSchema",
+    "DefaultConverter",
+    "Timestamp",
+    "MSTimestamp",
+    "Related",
+    "ForeignKey",
+    "setup",
+)

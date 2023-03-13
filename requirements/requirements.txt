@@ -1,2 +1,0 @@
-peewee > 3
-marshmallow > 3

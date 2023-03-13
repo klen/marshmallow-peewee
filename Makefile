@@ -1,12 +1,34 @@
-VIRTUAL_ENV 	?= $(CURDIR)/env
-PROJECT	   	?= marshmallow_peewee
+PACKAGE	   	?= marshmallow_peewee
+VIRTUAL_ENV 	?= .venv
 
 all: $(VIRTUAL_ENV)
 
-.PHONY: help
-# target: help - Display callable targets
-help:
-	@egrep "^# target:" [Mm]akefile
+.PHONY: clean
+# target: clean - Display callable targets
+clean:
+	rm -rf build/ dist/ docs/_build *.egg-info
+	find $(CURDIR) -name "*.py[co]" -delete
+	find $(CURDIR) -name "*.orig" -delete
+	find $(CURDIR)/$(MODULE) -name "__pycache__" | xargs rm -rf
+
+# =============
+#  Development
+# =============
+
+$(VIRTUAL_ENV): pyproject.toml
+	@poetry install --with dev,tests
+	@poetry run pre-commit install --hook-type pre-push
+	@touch $(VIRTUAL_ENV)
+
+.PHONY: t test
+# target: test - Run tests
+t test: $(VIRTUAL_ENV)
+	@poetry run pytest tests
+
+.PHONY: mypy
+# target: mypy - Run type checking
+mypy: $(VIRTUAL_ENV)
+	@poetry run mypy
 
 # ==============
 #  Bump version
@@ -16,7 +38,9 @@ help:
 VERSION?=minor
 # target: release - Bump version
 release: $(VIRTUAL_ENV)
-	@$(VIRTUAL_ENV)/bin/bump2version $(VERSION)
+	@$(eval VFROM := $(shell poetry version -s))
+	@poetry version $(VERSION)
+	@git commit -am "Bump version from $(VFROM) → `poetry version -s`"
 	@git checkout master
 	@git merge develop
 	@git checkout develop
@@ -33,34 +57,3 @@ patch:
 .PHONY: major
 major:
 	make release VERSION=major
-
-# ===============
-#  Build package
-# ===============
-
-.PHONY: upload
-# target: upload - Upload module on PyPi
-upload: clean
-	@$(VIRTUAL_ENV)/bin/pip install twine wheel
-	@$(VIRTUAL_ENV)/bin/python setup.py sdist bdist_wheel
-	@$(VIRTUAL_ENV)/bin/twine upload dist/*
-	@$(VIRTUAL_ENV)/bin/pip install -e $(CURDIR)
-
-# =============
-#  Development
-# =============
-
-$(VIRTUAL_ENV): requirements/requirements.txt requirements/requirements-tests.txt
-	@[ -d $(VIRTUAL_ENV) ] || virtualenv --python=python3 $(VIRTUAL_ENV)
-	@$(VIRTUAL_ENV)/bin/pip install -e .[tests,build]
-	@touch $(VIRTUAL_ENV)
-
-.PHONY: t test
-# target: test - Run tests
-t test: $(VIRTUAL_ENV)
-	@$(VIRTUAL_ENV)/bin/pytest tests
-
-.PHONY: mypy
-# target: mypy - Run type checking
-mypy: $(VIRTUAL_ENV)
-	@$(VIRTUAL_ENV)/bin/mypy marshmallow_peewee

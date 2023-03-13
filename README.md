@@ -123,7 +123,7 @@ $ pip install marshmallow-peewee
             model = User
 
             # model_converter: Use custom model_converter
-            # model_converter = marshmallow_peewee.ModelConverter
+            # model_converter = marshmallow_peewee.DefaultConverter
 
             # dump_only_pk: Primary key is dump only
             # dump_only_pk = True
@@ -148,6 +148,38 @@ class UserSchema(ModelSchema):
 
 ```
 
+Customize fields convertion:
+
+```python
+
+from marshmallow_peewee import DefaultConverter
+
+# Customize global
+
+# Serialize boolean as string
+DefaultConverter.register(peewee.BooleanField, marshmallow.fields.String)
+
+# Alternative method
+@DefaultConverter.register(peewee.BooleanField)
+def build_field(field: peewee.Field, opts, **field_params):
+  return marshmallow.fields.String(**params)
+
+# Customize only for a scheme
+
+class CustomConverter(DefaultConverter):
+  pass
+
+
+CustomConverter.register(...)
+
+
+class CustomSchema(ModelSchema): # may be inherited
+  class Meta:
+    model_converter = CustomConverter
+
+
+````
+
 ## Bug tracker
 
 If you have any suggestions, bug reports or annoyances please report them to
@@ -162,4 +194,3 @@ Development of the project happens at: https://github.com/klen/marshmallow-peewe
 ## License
 
 Licensed under a [MIT License](http://opensource.org/licenses/MIT)
-
