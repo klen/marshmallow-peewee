@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "marshmallow-peewee"
-version = "3.4.7"
+version = "4.0.0"
 description = "Peewee ORM integration with the Marshmallow (de)serialization library"
 authors = ["Kirill Klenov <horneds@gmail.com>"]
 license = "MIT"
