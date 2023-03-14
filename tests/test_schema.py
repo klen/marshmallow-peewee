@@ -14,7 +14,6 @@ class User(pw.Model):
 
 
 def test_schema():
-
     from marshmallow_peewee import ModelSchema
 
     class UserSchema(ModelSchema):
