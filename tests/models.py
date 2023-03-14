@@ -23,7 +23,7 @@ class User(pw.Model):
     name = SubclassedCharField(255)
     title = pw.CharField(127, null=True)
     active = pw.BooleanField(default=True, help_text="Is user active")
-    rating = pw.IntegerField(default=0)
+    rating = pw.BigIntegerField(default=0)
 
     role = pw.ForeignKeyField(Role)
 

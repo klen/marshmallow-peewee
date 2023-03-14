@@ -92,14 +92,12 @@ class DefaultConverter(metaclass=ModelConverterMeta):
 
         # use first "known" field class from field class mro
         # so that extended field classes get converted correctly
-        for pw_field, builder in self.TYPE_MAPPING:  # noqa: B007
-            if isinstance(field, pw_field):
-                break
-        else:
-            ma_field = fields.Raw
-            builder = generate_builder(ma_field)
+        for cls in field.__class__.__mro__:
+            for pw_field, builder in self.TYPE_MAPPING:
+                if cls is pw_field:
+                    return builder(field, self.opts, **params)
 
-        return builder(field, self.opts, **params)
+        return DEFAULT_BUILDER(field, self.opts, **params)
 
 
 def generate_builder(ma_field_cls: Type[fields.Field]) -> Callable:
@@ -109,6 +107,9 @@ def generate_builder(ma_field_cls: Type[fields.Field]) -> Callable:
         return ma_field_cls(**params)
 
     return builder
+
+
+DEFAULT_BUILDER = generate_builder(fields.Raw)
 
 
 DefaultConverter.register(pw.IntegerField, ma_field=fields.Integer)
@@ -128,7 +129,6 @@ DefaultConverter.register(pw.UUIDField, ma_field=fields.UUID)
 
 
 @DefaultConverter.register(pw.AutoField)
-@DefaultConverter.register(pw.BigIntegerField)
 def convert_autofield(_: pw.Field, opts: SchemaOpts, **params) -> fields.Field:
     ftype = fields.String if opts.string_keys else fields.Integer
     params["required"] = False

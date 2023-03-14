@@ -5,9 +5,9 @@ from typing import Any, Dict, Iterable, Mapping, Optional, Type, Union
 import marshmallow as ma
 import peewee as pw
 
+from .config import DEFAULTS
 from .convert import DefaultConverter
 from .fields import Related
-from .opts import DEFAULTS
 
 
 class SchemaOpts(ma.SchemaOpts):
@@ -39,6 +39,7 @@ INHERITANCE_OPTIONS = (
     "datetimeformat",
     "dateformat",
     "timeformat",
+    "unknown",
 )
 
 
