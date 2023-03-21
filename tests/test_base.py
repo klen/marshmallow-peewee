@@ -32,16 +32,16 @@ def test_schema():
     assert result.role
     assert not result.active
 
-    result = UserSchema().dump(user)
-    assert result
-    assert result["id"] == "1"
-    assert result["name"] == "Mike"
-    assert result["role"] == str(role.id)
-    assert result["created"] > 100000
+    result2 = UserSchema().dump(user)
+    assert result2
+    assert result2["id"] == "1"
+    assert result2["name"] == "Mike"
+    assert result2["role"] == str(role.id)
+    assert result2["created"] > 100000
 
-    result = UserSchema().load(result, unknown=ma.EXCLUDE)
-    assert isinstance(result, User)
-    assert result.name == "Mike"
+    result3 = UserSchema().load(result2, unknown=ma.EXCLUDE)
+    assert isinstance(result3, User)
+    assert result3.name == "Mike"
 
     class ModelSchema(BaseSchema):
         class Meta:
@@ -53,9 +53,9 @@ def test_schema():
         class Meta:
             model = User
 
-    result = UserSchema2().dump(user)
-    assert result
-    assert result["id"] == 1
+    result4 = UserSchema2().dump(user)
+    assert result4
+    assert result4["id"] == 1
 
 
 def test_schema_related():

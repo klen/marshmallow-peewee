@@ -80,7 +80,6 @@ class SchemaMeta(schema.SchemaMeta):
         declared_fields = dict_cls()
         model = getattr(opts, "model", None)
         if model is not None:
-
             for name, field in base_fields.items():
                 if isinstance(field, Related) and field.nested is None:
                     field.init_model(model, name)
