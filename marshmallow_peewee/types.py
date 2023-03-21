@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import List, Tuple, Type, TypeVar
+from typing import Callable, List, Tuple, Type, TypeVar
 
 import marshmallow as ma
 import peewee as pw
