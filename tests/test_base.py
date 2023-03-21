@@ -18,7 +18,7 @@ def _setup(db):
 def test_schema():
     from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(BaseSchema):
+    class UserSchema(BaseSchema[User]):
         created = ma.fields.DateTime("timestamp_ms")
 
         class Meta:
@@ -47,13 +47,13 @@ def test_schema():
         class Meta:
             string_keys = False
 
-    class UserSchema(ModelSchema):
+    class UserSchema2(ModelSchema):
         created = ma.fields.DateTime("timestamp_ms")
 
         class Meta:
             model = User
 
-    result = UserSchema().dump(user)
+    result = UserSchema2().dump(user)
     assert result
     assert result["id"] == 1
 
@@ -62,7 +62,7 @@ def test_schema_related():
     from marshmallow_peewee import ModelSchema as BaseSchema
     from marshmallow_peewee import Related
 
-    class UserSchema(BaseSchema):
+    class UserSchema(BaseSchema[User]):
         role = Related(unknown=ma.EXCLUDE)
 
         class Meta:
@@ -89,29 +89,29 @@ def test_schema_related():
     assert not result.id
     assert result.role
 
-    class RoleSchema(BaseSchema):
+    class RoleSchema(BaseSchema[Role]):
         class Meta:
             model = Role
             fields = ("id",)
 
-    class UserSchema(BaseSchema):
+    class UserSchema2(BaseSchema[User]):
         role = Related(RoleSchema)
 
         class Meta:
             model = User
             dump_only_pk = False
 
-    result = UserSchema().dump(user)
+    result = UserSchema2().dump(user)
     assert result
     assert "name" not in result["role"]
 
-    class RoleSchema(BaseSchema):
+    class RoleSchema2(BaseSchema[Role]):
         user_set = Related()
 
         class Meta:
             model = Role
 
-    result = RoleSchema().dump(user.role)
+    result = RoleSchema2().dump(user.role)
     assert result
     assert result["user_set"]
 
@@ -119,7 +119,7 @@ def test_schema_related():
 def tests_partition(db):
     from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(BaseSchema):
+    class UserSchema(BaseSchema[User]):
         class Meta:
             model = User
 
@@ -143,7 +143,7 @@ def test_custom_converter(db):
 
     CustomConverter.register(pw.BooleanField, ma.fields.String)
 
-    class CustomSchema(BaseSchema):
+    class CustomSchema(BaseSchema[User]):
         class Meta:
             model_converter = CustomConverter
 
@@ -161,7 +161,7 @@ def test_custom_converter(db):
 def test_field_error(db, created_val):
     from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(BaseSchema):
+    class UserSchema(BaseSchema[User]):
         created = ma.fields.DateTime("timestamp")
 
         class Meta:
@@ -176,14 +176,14 @@ def test_field_error(db, created_val):
 
     payload["created"] = created_val
 
-    with pytest.raises(ma.exceptions.ValidationError):
+    with pytest.raises(ma.ValidationError):
         UserSchema().loads(json.dumps(payload))
 
 
 def test_string_fields():
     from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(BaseSchema):
+    class UserSchema(BaseSchema[User]):
         class Meta:
             model = User
             string_keys = False
@@ -197,7 +197,7 @@ def test_string_fields():
 def test_id_keys():
     from marshmallow_peewee import ModelSchema as BaseSchema
 
-    class UserSchema(BaseSchema):
+    class UserSchema(BaseSchema[User]):
         class Meta:
             model = User
             id_keys = True

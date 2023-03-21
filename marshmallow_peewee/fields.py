@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
 from marshmallow import Schema, fields
 
@@ -11,8 +11,8 @@ if TYPE_CHECKING:
 class Related(fields.Nested):
     def __init__(
         self,
-        nested: Optional[Schema] = None,
-        meta: Optional[Dict] = None,
+        nested: Optional[Type[Schema]] = None,
+        meta: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         self.field = None
@@ -22,7 +22,7 @@ class Related(fields.Nested):
     def init_model(self, model: pw.Model, name: str):
         from .schema import ModelSchema
 
-        field = model._meta.fields.get(name)
+        field = model._meta.fields.get(name)  # type: ignore[]
         if not field:
             field = getattr(model, name).field
             self.many = True

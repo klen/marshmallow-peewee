@@ -38,6 +38,7 @@ pytest-mypy = "*"
 [tool.mypy]
 packages = ["marshmallow_peewee"]
 ignore_missing_imports = true
+check_untyped_defs = true
 
 [tool.pytest.ini_options]
 addopts = "--mypy -xvs"

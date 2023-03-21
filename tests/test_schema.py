@@ -26,7 +26,7 @@ def test_schema():
     data = schema.dump(user)
     assert data == {
         "id": None,
-        "created": user.created.isoformat(),
+        "created": user.created.isoformat(),  # type: ignore[]
         "title": "foo",
         "active": True,
         "rating": 42,

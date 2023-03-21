@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from typing import TYPE_CHECKING, List, Optional, Type
+from typing import TYPE_CHECKING, List, Optional, Type, cast, overload
 
 import peewee as pw
 from marshmallow import ValidationError, fields
@@ -21,7 +21,7 @@ class ModelConverterMeta(type):
 
     def __new__(cls, name, bases, attrs):
         kls = super().__new__(cls, name, bases, attrs)
-        kls.TYPE_MAPPING = list(kls.TYPE_MAPPING)
+        kls.TYPE_MAPPING = list(kls.TYPE_MAPPING)  # type: ignore[attr-defined]
         return kls
 
 
@@ -35,7 +35,8 @@ class DefaultConverter(metaclass=ModelConverterMeta):
 
     def get_fields(self, model: pw.Model) -> OrderedDict:
         result = OrderedDict()
-        for field in model._meta.sorted_fields:
+        meta = cast(pw.Metadata, model._meta)  # type: ignore[]
+        for field in meta.sorted_fields:
             name = field.name
             if self.opts.id_keys and isinstance(field, pw.ForeignKeyField):
                 name = field.column_name
@@ -46,12 +47,22 @@ class DefaultConverter(metaclass=ModelConverterMeta):
 
         return result
 
+    @overload
+    @classmethod
+    def register(cls, field: Type[pw.Field]) -> Callable[[Callable], Callable]:
+        ...
+
+    @overload
+    @classmethod
+    def register(cls, field: Type[pw.Field], ma_field: Type[fields.Field]) -> None:
+        ...
+
     @classmethod
     def register(
         cls,
         field: Type[pw.Field],
         ma_field: Optional[Type[fields.Field]] = None,
-    ):
+    ) -> Callable[[Callable], Callable] | None:
         if ma_field is None:
 
             def wrapper(fn):
@@ -128,14 +139,14 @@ DefaultConverter.register(pw.FixedCharField, ma_field=fields.String)
 DefaultConverter.register(pw.UUIDField, ma_field=fields.UUID)
 
 
-@DefaultConverter.register(pw.AutoField)
+@DefaultConverter.register(pw.AutoField)  # type: ignore[]
 def convert_autofield(_: pw.Field, opts: SchemaOpts, **params) -> fields.Field:
     ftype = fields.String if opts.string_keys else fields.Integer
     params["required"] = False
     return ftype(dump_only=opts.dump_only_pk, **params)
 
 
-@DefaultConverter.register(pw.CharField)
+@DefaultConverter.register(pw.CharField)  # type: ignore[]
 def convert_charfield(
     field: pw.CharField,
     _: SchemaOpts,
@@ -150,7 +161,7 @@ def convert_charfield(
     return fields.String(validate=validate, **params)
 
 
-@DefaultConverter.register(pw.BooleanField)
+@DefaultConverter.register(pw.BooleanField)  # type: ignore[]
 def convert_booleanfield(
     _: pw.BooleanField,
     __: SchemaOpts,

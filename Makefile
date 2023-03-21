@@ -58,3 +58,7 @@ patch:
 .PHONY: major
 major:
 	make release VERSION=major
+
+.PHONY: version v
+version v:
+	@poetry version -s

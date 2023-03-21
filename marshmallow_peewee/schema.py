@@ -1,17 +1,32 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Mapping, Optional, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Type,
+    Union,
+    overload,
+)
 
 import marshmallow as ma
 import peewee as pw
+from marshmallow import schema
 
 from .config import DEFAULTS
 from .convert import DefaultConverter
 from .fields import Related
+from .types import TVModel
 
 
-class SchemaOpts(ma.SchemaOpts):
-    model: Optional[Type[pw.Model]]
+class SchemaOpts(ma.SchemaOpts, Generic[TVModel]):
+    model: Optional[Type[TVModel]]
     dump_only_pk: bool
     string_keys: bool
     id_keys: bool
@@ -43,7 +58,7 @@ INHERITANCE_OPTIONS = (
 )
 
 
-class SchemaMeta(ma.schema.SchemaMeta):
+class SchemaMeta(schema.SchemaMeta):
     def __new__(cls, name, bases, attrs):
         """Support inheritance for model and model_converter Meta options."""
         if "Meta" in attrs and bases:
@@ -58,56 +73,82 @@ class SchemaMeta(ma.schema.SchemaMeta):
 
     @classmethod
     def get_declared_fields(cls, klass, cls_fields, inherited_fields, dict_cls):
-        declared_fields = dict_cls()
         opts: SchemaOpts = klass.opts
         base_fields = super(SchemaMeta, cls).get_declared_fields(
-            klass,
-            cls_fields,
-            inherited_fields,
-            dict_cls,
+            klass, cls_fields, inherited_fields, dict_cls
         )
+        declared_fields = dict_cls()
         model = getattr(opts, "model", None)
-        if model:
+        if model is not None:
+
             for name, field in base_fields.items():
                 if isinstance(field, Related) and field.nested is None:
                     field.init_model(model, name)
 
-            converter = opts.model_converter(
-                opts=opts,
-            )
+            converter = opts.model_converter(opts=opts)
             declared_fields.update(converter.get_fields(model))
         declared_fields.update(base_fields)
         return declared_fields
 
 
-class ModelSchema(ma.Schema, metaclass=SchemaMeta):
+class ModelSchema(ma.Schema, Generic[TVModel], metaclass=SchemaMeta):
     OPTIONS_CLASS = SchemaOpts
 
-    opts: SchemaOpts
+    opts: SchemaOpts[TVModel]
 
-    def __init__(self, instance: pw.Model = None, **kwargs):
+    def __init__(self, instance: Optional[TVModel] = None, **kwargs):
         self.instance = instance
         super(ModelSchema, self).__init__(**kwargs)
 
-    @ma.post_load
-    def make_instance(self, data: Dict, **_) -> Union[Dict, pw.Model]:
-        """Build object from data."""
-        if not self.opts.model:
-            return data
+    @overload  # type: ignore[override]
+    def load(self, data, *, many: Optional[Literal[False]] = None, **kwargs) -> TVModel:
+        ...
 
-        if self.instance is not None:
-            for key, value in data.items():
-                setattr(self.instance, key, value)
-            return self.instance
-
-        return self.opts.model(**data)
+    @overload
+    def load(
+        self, data, *, many: Optional[Literal[True]] = None, **kwargs
+    ) -> List[TVModel]:
+        ...
 
     def load(
         self,
         data: Union[Mapping[str, Any], Iterable[Mapping[str, Any]]],
-        instance: pw.Model = None,
-        *args,
+        *,
+        instance: Optional[TVModel] = None,
         **kwargs,
     ):
         self.instance = instance or self.instance
-        return super(ModelSchema, self).load(data, *args, **kwargs)
+        return super().load(data, **kwargs)
+
+    @ma.post_load
+    def make_instance(self, data: Dict[str, Any], **params) -> Union[Dict, TVModel]:
+        """Build object from data."""
+        if not self.opts.model:
+            return data
+
+        if self.instance is None:
+            return self.opts.model(**data)
+
+        for key, value in data.items():
+            setattr(self.instance, key, value)
+
+        return self.instance
+
+    if TYPE_CHECKING:
+
+        @overload  # type: ignore[override]
+        def dump(self, obj) -> Dict[str, Any]:
+            ...
+
+        @overload
+        def dump(self, obj, *, many: Literal[False]) -> Dict[str, Any]:
+            ...
+
+        @overload
+        def dump(self, obj, *, many: Literal[True]) -> List[Dict[str, Any]]:
+            ...
+
+        def dump(
+            self, obj: Union[TVModel, Iterable[TVModel]], *, many: Optional[bool] = None
+        ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+            ...

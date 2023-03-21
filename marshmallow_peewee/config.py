@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-DEFAULTS = {
+from typing import Final
+
+DEFAULTS: Final = {
     "dump_only_pk": True,
     "string_keys": True,
     "id_keys": False,

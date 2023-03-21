@@ -14,7 +14,7 @@ def _setup(db):
 def test_related():
     from marshmallow_peewee import ModelSchema, Related
 
-    class UserSchema(ModelSchema):
+    class UserSchema(ModelSchema[User]):
         role = Related()
 
         class Meta:
