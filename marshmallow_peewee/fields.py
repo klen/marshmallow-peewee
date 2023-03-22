@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type
+from typing import Any, Dict, Optional, Type, Union
 
+import peewee as pw
 from marshmallow import Schema, fields
-
-if TYPE_CHECKING:
-    import peewee as pw
 
 
 class Related(fields.Nested):
@@ -59,3 +57,30 @@ class ForeignKey(fields.Raw):
         if value is not None and self.string_keys:
             return str(value)
         return value
+
+
+class FKNested(fields.Nested):
+    """Get an related instance from cache."""
+
+    def __init__(self, nested: Union[Type[Schema], Type[pw.Model]], **kwargs):
+        if issubclass(nested, pw.Model):
+            nested = self.get_schema(nested)
+
+        super(FKNested, self).__init__(nested, **kwargs)
+
+    @staticmethod
+    def get_schema(model_cls: Type[pw.Model]) -> Type[Schema]:
+        from .schema import ModelSchema
+
+        class Schema(ModelSchema):
+            class Meta:
+                model = model_cls
+
+        return Schema
+
+    def get_value(self, obj: pw.Model, attr: str, accessor=None, default=None):
+        fk = obj.__data__.get(attr)
+        if fk is None:
+            return None
+
+        return obj.__rel__[attr]

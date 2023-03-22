@@ -27,3 +27,21 @@ def test_related():
     data = UserSchema().dump(user)
     assert data
     assert data["role"]
+
+
+def test_fknested():
+    from marshmallow_peewee import FKNested, ModelSchema
+
+    class UserSchema(ModelSchema[User]):
+        role = FKNested(Role)
+
+        class Meta:
+            model = User
+            string_keys = False
+
+    role = Role.create(name="admin")
+    user = User.create(name="Mike", role=role)
+
+    data = UserSchema().dump(user)
+    assert data
+    assert data["role"]
