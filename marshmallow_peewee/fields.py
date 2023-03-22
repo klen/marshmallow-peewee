@@ -64,17 +64,19 @@ class FKNested(fields.Nested):
 
     def __init__(self, nested: Union[Type[Schema], Type[pw.Model]], **kwargs):
         if issubclass(nested, pw.Model):
-            nested = self.get_schema(nested)
+            nested = self.get_schema(nested, **kwargs)
 
         super(FKNested, self).__init__(nested, **kwargs)
 
     @staticmethod
-    def get_schema(model_cls: Type[pw.Model]) -> Type[Schema]:
+    def get_schema(model_cls: Type[pw.Model], **kwargs) -> Type[Schema]:
         from .schema import ModelSchema
 
         class Schema(ModelSchema):
             class Meta:
                 model = model_cls
+                fields = kwargs.get("only", ())
+                exclude = kwargs.get("exclude", ())
 
         return Schema
 
