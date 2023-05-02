@@ -51,9 +51,10 @@ class ForeignKey(fields.Raw):
         self.string_keys = schema.opts.string_keys
         super()._bind_to_schema(field_name, schema)
 
-    def get_value(self, obj: pw.Model, *_, **__) -> Any:
+    def get_value(self, obj: pw.Model, attr, **_) -> Any:  # type: ignore[override]
         """Return the value for a given key from an object."""
-        value = obj.__data__.get(self.attribute)
+        check_key = attr if self.attribute is None else self.attribute
+        value = obj.__data__.get(check_key)
         if value is not None and self.string_keys:
             return str(value)
         return value
