@@ -33,7 +33,7 @@ class DefaultConverter(metaclass=ModelConverterMeta):
     def __init__(self, opts: SchemaOpts):
         self.opts = opts
 
-    def get_fields(self, model: pw.Model) -> OrderedDict:
+    def get_fields(self, model: pw.Model) -> OrderedDict[str, fields.Field]:
         result = OrderedDict()
         meta = cast(pw.Metadata, model._meta)  # type: ignore[]
         for field in meta.sorted_fields:
