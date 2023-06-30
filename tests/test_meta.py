@@ -1,14 +1,6 @@
 from __future__ import annotations
 
-import pytest
-
-from .models import Role, User, proxy
-
-
-@pytest.fixture(autouse=True)
-def _setup(db):
-    proxy.initialize(db)
-    db.create_tables([Role, User])
+from .models import Role, User
 
 
 def test_string_keys():
@@ -52,16 +44,16 @@ def test_id_keys():
             string_keys = False
             dump_only_pk = False
 
-    role = Role.create()
-    user = User.create(name="Mike", role=role)
+    role = Role(id=1)
+    user = User(name="Mike", role=role, id=1)
 
     data = UserSchema().dump(user)
     assert "role_id" in data
-    assert data["role_id"] == role.id
+    assert data["role_id"] == role.id  # type: ignore[]
 
     user2 = UserSchema().load(data)
     assert user2 == user
-    assert user2.role == role
+    assert user2.role_id == role.id  # type: ignore[]
 
     class BaseSchema2(BaseSchema[User]):
         class Meta:
@@ -73,4 +65,11 @@ def test_id_keys():
 
     data = UserSchema2().dump(user)
     assert "role_id" in data
-    assert data["role_id"] == str(role.id)
+    assert data["role_id"] == str(role.id)  # type: ignore[]
+
+    class UserSchema3(UserSchema2):
+        pass
+
+    data = UserSchema3().dump(user)
+    assert "role_id" in data
+    assert data["role_id"] == str(role.id)  # type: ignore[]

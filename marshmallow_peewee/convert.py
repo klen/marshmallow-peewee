@@ -38,7 +38,9 @@ class DefaultConverter(metaclass=ModelConverterMeta):
         meta = cast(pw.Metadata, model._meta)  # type: ignore[]
         for field in meta.sorted_fields:
             name = field.name
-            if self.opts.id_keys and isinstance(field, pw.ForeignKeyField):
+            if self.opts.id_keys and isinstance(
+                field, (pw.ForeignKeyField, pw.DeferredForeignKey)
+            ):
                 name = field.column_name
 
             ma_field = self.convert(field)

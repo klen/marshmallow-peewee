@@ -33,10 +33,11 @@ def test_fknested():
     from marshmallow_peewee import FKNested, ModelSchema
 
     class UserSchema(ModelSchema[User]):
-        role = FKNested(Role, only=("name",))
+        user_role = FKNested(Role, only=("name",), attribute="role")
 
         class Meta:
             model = User
+            exclude = ("role",)
             string_keys = False
 
     role = Role.create(name="admin")
@@ -44,5 +45,5 @@ def test_fknested():
 
     data = UserSchema().dump(user)
     assert data
-    assert data["role"]
-    assert "id" not in data["role"]
+    assert data["user_role"]
+    assert "id" not in data["user_role"]

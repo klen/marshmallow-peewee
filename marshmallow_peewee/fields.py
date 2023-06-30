@@ -82,8 +82,9 @@ class FKNested(fields.Nested):
         return Schema
 
     def get_value(self, obj: pw.Model, attr: str, accessor=None, default=None):
-        fk = obj.__data__.get(attr)
+        data_key = self.attribute or attr
+        fk = obj.__data__.get(data_key)
         if fk is None:
             return None
 
-        return obj.__rel__[attr]
+        return obj.__rel__[data_key]
