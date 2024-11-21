@@ -12,7 +12,7 @@ integration with the
 
 ## Requirements
 
-* python >= 3.7
+* python >= 3.9
 
 ## Installation
 

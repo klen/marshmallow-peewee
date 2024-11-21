@@ -3,14 +3,12 @@ from __future__ import annotations
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
+    ClassVar,
     Generic,
     Iterable,
-    List,
     Literal,
     Mapping,
     Optional,
-    Type,
     Union,
     overload,
 )
@@ -26,11 +24,11 @@ from .types import TVModel
 
 
 class SchemaOpts(ma.SchemaOpts, Generic[TVModel]):
-    model: Optional[Type[TVModel]]
+    model: Optional[type[TVModel]]
     dump_only_pk: bool
     string_keys: bool
     id_keys: bool
-    model_converter: Type[DefaultConverter]
+    model_converter: type[DefaultConverter]
 
     def __init__(self, meta, **kwargs):
         super(SchemaOpts, self).__init__(meta, **kwargs)
@@ -73,7 +71,7 @@ class SchemaMeta(schema.SchemaMeta):
         return super(SchemaMeta, cls).__new__(cls, name, bases, attrs)
 
     @classmethod
-    def get_declared_fields(cls, klass, cls_fields, inherited_fields, dict_cls):
+    def get_declared_fields(cls, klass, cls_fields, inherited_fields, dict_cls=dict):
         opts: SchemaOpts = klass.opts
         base_fields = super(SchemaMeta, cls).get_declared_fields(
             klass, cls_fields, inherited_fields, dict_cls
@@ -95,20 +93,21 @@ class ModelSchema(ma.Schema, Generic[TVModel], metaclass=SchemaMeta):
     OPTIONS_CLASS = SchemaOpts
 
     opts: SchemaOpts[TVModel]
+    Meta: ClassVar[type[Any]]
 
     def __init__(self, instance: Optional[TVModel] = None, **kwargs):
         self.instance = instance
         super(ModelSchema, self).__init__(**kwargs)
 
     @overload  # type: ignore[override]
-    def load(self, data, *, many: Optional[Literal[False]] = None, **kwargs) -> TVModel:
-        ...
+    def load(
+        self, data, *, many: Optional[Literal[False]] = None, **kwargs
+    ) -> TVModel: ...
 
     @overload
     def load(
         self, data, *, many: Optional[Literal[True]] = None, **kwargs
-    ) -> List[TVModel]:
-        ...
+    ) -> list[TVModel]: ...
 
     def load(
         self,
@@ -121,7 +120,7 @@ class ModelSchema(ma.Schema, Generic[TVModel], metaclass=SchemaMeta):
         return super().load(data, **kwargs)
 
     @ma.post_load
-    def make_instance(self, data: Dict[str, Any], **params) -> Union[Dict, TVModel]:
+    def make_instance(self, data: dict[str, Any], **params) -> Union[dict, TVModel]:
         """Build object from data."""
         if not self.opts.model:
             return data
@@ -137,18 +136,14 @@ class ModelSchema(ma.Schema, Generic[TVModel], metaclass=SchemaMeta):
     if TYPE_CHECKING:
 
         @overload  # type: ignore[override]
-        def dump(self, obj) -> Dict[str, Any]:
-            ...
+        def dump(self, obj) -> dict[str, Any]: ...
 
         @overload
-        def dump(self, obj, *, many: Literal[False]) -> Dict[str, Any]:
-            ...
+        def dump(self, obj, *, many: Literal[False]) -> dict[str, Any]: ...
 
         @overload
-        def dump(self, obj, *, many: Literal[True]) -> List[Dict[str, Any]]:
-            ...
+        def dump(self, obj, *, many: Literal[True]) -> list[dict[str, Any]]: ...
 
         def dump(
             self, obj: Union[TVModel, Iterable[TVModel]], *, many: Optional[bool] = None
-        ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
-            ...
+        ) -> Union[dict[str, Any], list[dict[str, Any]]]: ...

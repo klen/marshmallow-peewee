@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from typing import TYPE_CHECKING, List, Optional, Type, cast, overload
+from typing import TYPE_CHECKING, Optional, cast, overload
 
 import peewee as pw
 from marshmallow import ValidationError, fields
@@ -36,34 +36,35 @@ class DefaultConverter(metaclass=ModelConverterMeta):
     def get_fields(self, model: pw.Model) -> OrderedDict[str, fields.Field]:
         result = OrderedDict()
         meta = cast(pw.Metadata, model._meta)  # type: ignore[]
+        id_keys = self.opts.id_keys
         for field in meta.sorted_fields:
-            name = field.name
-            if self.opts.id_keys and isinstance(
+            data_key = field.name
+            if id_keys and isinstance(
                 field, (pw.ForeignKeyField, pw.DeferredForeignKey)
             ):
-                name = field.column_name
+                data_key = field.column_name
 
-            ma_field = self.convert(field)
-            if ma_field:
-                result[name] = ma_field
+            ma_field = self.convert(field, data_key)
+            if not ma_field:
+                continue
+
+            result[data_key] = ma_field
 
         return result
 
     @overload
     @classmethod
-    def register(cls, field: Type[pw.Field]) -> Callable[[Callable], Callable]:
-        ...
+    def register(cls, field: type[pw.Field]) -> Callable[[Callable], Callable]: ...
 
     @overload
     @classmethod
-    def register(cls, field: Type[pw.Field], ma_field: Type[fields.Field]) -> None:
-        ...
+    def register(cls, field: type[pw.Field], ma_field: type[fields.Field]) -> None: ...
 
     @classmethod
     def register(
         cls,
-        field: Type[pw.Field],
-        ma_field: Optional[Type[fields.Field]] = None,
+        field: type[pw.Field],
+        ma_field: Optional[type[fields.Field]] = None,
     ) -> Callable[[Callable], Callable] | None:
         if ma_field is None:
 
@@ -78,10 +79,10 @@ class DefaultConverter(metaclass=ModelConverterMeta):
 
         return None
 
-    def convert(self, field: pw.Field) -> fields.Field:
+    def convert(self, field: pw.Field, data_key: Optional[str] = None) -> fields.Field:
         params = {
+            "data_key": data_key or field.name,
             "allow_none": field.null,
-            "attribute": field.name,
             "required": not field.null and field.default is None,
             "validate": [convert_value_validate(field.db_value)],
         }
@@ -100,8 +101,9 @@ class DefaultConverter(metaclass=ModelConverterMeta):
                 labels.append(c[1])
             params["validate"].append(ma_validate.OneOf(choices, labels))
 
+        params["metadata"] = {"name": field.name}
         if field.help_text:
-            params["metadata"] = {"description": field.help_text}
+            params["metadata"]["description"] = field.help_text
 
         # use first "known" field class from field class mro
         # so that extended field classes get converted correctly
@@ -113,7 +115,7 @@ class DefaultConverter(metaclass=ModelConverterMeta):
         return DEFAULT_BUILDER(field, self.opts, **params)
 
 
-def generate_builder(ma_field_cls: Type[fields.Field]) -> Callable:
+def generate_builder(ma_field_cls: type[fields.Field]) -> Callable:
     """Generate builder function for given marshmallow field."""
 
     def builder(_: pw.Field, __: SchemaOpts, **params) -> fields.Field:
@@ -153,7 +155,7 @@ def convert_charfield(
     field: pw.CharField,
     _: SchemaOpts,
     *,
-    validate: Optional[List] = None,
+    validate: Optional[list] = None,
     **params,
 ) -> fields.Field:
     if validate is None:

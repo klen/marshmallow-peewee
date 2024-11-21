@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+from marshmallow_peewee import ModelSchema
+from marshmallow_peewee.fields import FKNested
+from marshmallow_peewee.types import TVModel
+
 from .models import Role, User
 
 
 def test_string_keys():
-    from marshmallow_peewee import ModelSchema
-
     class BaseSchema(ModelSchema):
         class Meta:
             datetimeformat = "timestamp"
 
     class UserSchema(BaseSchema):
-        class Meta:
+        class Meta(BaseSchema.Meta):
             model = User
             string_keys = False
 
@@ -23,8 +25,6 @@ def test_string_keys():
 
 
 def test_fields():
-    from marshmallow_peewee import ModelSchema
-
     class UserSchema(ModelSchema):
         class Meta:
             model = User
@@ -35,9 +35,7 @@ def test_fields():
 
 
 def test_id_keys():
-    from marshmallow_peewee import ModelSchema as BaseSchema
-
-    class UserSchema(BaseSchema[User]):
+    class UserSchema(ModelSchema[User]):
         class Meta:
             model = User
             id_keys = True
@@ -55,12 +53,12 @@ def test_id_keys():
     assert user2 == user
     assert user2.role_id == role.id  # type: ignore[]
 
-    class BaseSchema2(BaseSchema[User]):
+    class BaseSchema2(ModelSchema[User]):
         class Meta:
             id_keys = True
 
     class UserSchema2(BaseSchema2):
-        class Meta:
+        class Meta(BaseSchema2.Meta):
             model = User
 
     data = UserSchema2().dump(user)
@@ -73,3 +71,26 @@ def test_id_keys():
     data = UserSchema3().dump(user)
     assert "role_id" in data
     assert data["role_id"] == str(role.id)  # type: ignore[]
+
+
+def test_id_keys_nested():
+    class BaseSchema(ModelSchema[TVModel]):
+        class Meta:
+            id_keys = True
+
+    class RoleSchema(BaseSchema[Role]):
+        class Meta(BaseSchema.Meta):
+            model = Role
+
+    class UserSchema(BaseSchema[User]):
+        role = FKNested(RoleSchema)
+
+        class Meta(BaseSchema.Meta):
+            model = User
+
+    role = Role(id=1)
+    user = User(name="Mike", role=role, id=1)
+
+    data = UserSchema().dump(user)
+    assert data["role_id"] == str(role.id)  # type: ignore[]
+    assert data["role"]["id"] == str(role.id)  # type: ignore[]

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Optional, Union
 
 import peewee as pw
 from marshmallow import Schema, fields
@@ -9,8 +9,8 @@ from marshmallow import Schema, fields
 class Related(fields.Nested):
     def __init__(
         self,
-        nested: Optional[Type[Schema]] = None,
-        meta: Optional[Dict[str, Any]] = None,
+        nested: Optional[type[Schema]] = None,
+        meta: Optional[dict[str, Any]] = None,
         **kwargs,
     ):
         self.field = None
@@ -34,14 +34,14 @@ class Related(fields.Nested):
         meta = type("Meta", (), self.meta)
         self.nested = type("Schema", (ModelSchema,), {"Meta": meta})
 
-    def _deserialize(self, value, attr, data, **_):
+    def _deserialize(self, value, attr, data, partial=None, **_):
         if self.field is None:
             raise RuntimeError("Init model first.")
 
         if not isinstance(value, dict):
             return self.field.rel_field.python_value(value)
 
-        return super(Related, self)._deserialize(value, attr, data)
+        return super(Related, self)._deserialize(value, attr, data, partial=partial)
 
 
 class ForeignKey(fields.Raw):
@@ -53,8 +53,7 @@ class ForeignKey(fields.Raw):
 
     def get_value(self, obj: pw.Model, attr, **_) -> Any:  # type: ignore[override]
         """Return the value for a given key from an object."""
-        check_key = attr if self.attribute is None else self.attribute
-        value = obj.__data__.get(check_key)
+        value = obj.__data__.get(self.metadata["name"])
         if value is not None and self.string_keys:
             return str(value)
         return value
@@ -63,14 +62,14 @@ class ForeignKey(fields.Raw):
 class FKNested(fields.Nested):
     """Get an related instance from cache."""
 
-    def __init__(self, nested: Union[Type[Schema], Type[pw.Model]], **kwargs):
+    def __init__(self, nested: Union[type[Schema], type[pw.Model]], **kwargs):
         if issubclass(nested, pw.Model):
             nested = self.get_schema(nested, **kwargs)
 
         super(FKNested, self).__init__(nested, **kwargs)
 
     @staticmethod
-    def get_schema(model_cls: Type[pw.Model], **kwargs) -> Type[Schema]:
+    def get_schema(model_cls: type[pw.Model], **kwargs) -> type[Schema]:
         from .schema import ModelSchema
 
         class Schema(ModelSchema):
