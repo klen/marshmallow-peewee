@@ -5,6 +5,8 @@ import datetime as dt
 import marshmallow as ma
 import peewee as pw
 
+from marshmallow_peewee import ModelSchema
+
 
 class User(pw.Model):
     created = pw.DateTimeField(default=dt.datetime.now)
@@ -14,8 +16,6 @@ class User(pw.Model):
 
 
 def test_schema():
-    from marshmallow_peewee import ModelSchema
-
     class UserSchema(ModelSchema):
         class Meta:
             model = User

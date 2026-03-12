@@ -1,12 +1,11 @@
-[tool.poetry]
+[project]
 name = "marshmallow-peewee"
 version = "5.0.0"
 description = "Peewee ORM integration with the Marshmallow (de)serialization library"
-authors = ["Kirill Klenov <horneds@gmail.com>"]
-license = "MIT"
+authors = [{ name = "Kirill Klenov", email = "horneds@gmail.com" }]
+requires-python = ">=3.10,<4"
 readme = "README.md"
-homepage = "https://github.com/klen/marshmallow-peewee"
-repository = "https://github.com/klen/marshmallow-peewee"
+license = "MIT"
 keywords = ["marshmallow", "peewee", "orm", "serialization", "deserialization"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -14,34 +13,68 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
-packages = [{ include = "marshmallow_peewee" }]
+dependencies = ["peewee", "marshmallow>=3.0.0,<4"]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-peewee = "^3.14.0"
-marshmallow = "^3.0.0"
+[project.urls]
+Homepage = "https://github.com/klen/marshmallow-peewee"
+Repository = "https://github.com/klen/marshmallow-peewee"
 
-[tool.poetry.group.dev.dependencies]
-pre-commit = "*"
+[dependency-groups]
+dev = ["pre-commit", "ruff", "pyrefly"]
+tests = ["pytest"]
 
-[tool.poetry.group.tests.dependencies]
-pytest = "*"
-pytest-mypy = "*"
+[tool.uv]
+default-groups = "all"
 
-[tool.mypy]
-packages = ["marshmallow_peewee"]
-ignore_missing_imports = true
-check_untyped_defs = true
-
-[tool.pytest.ini_options]
-addopts = "--mypy -xvs"
+[tool.uv.build-backend]
+module-name = ["marshmallow_peewee"]
+module-root = ""
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.10.2,<0.11.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+addopts = "-xvs"
+
+[tool.ruff]
+include = ["marshmallow_peewee/*", "tests/**/*"]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "ANN",
+  "ARG",
+  "COM",
+  "D",
+  "N",
+  "UP",
+  "S",
+  "SLF",
+  "INP001",
+  "PLR2004",
+  "TD",
+  "FIX",
+]
+
+[tool.pyrefly]
+project-includes = ["marshmallow_peewee"]
+project-excludes = ["tests", "pyproject.toml"]
+
+[tool.bumpversion]
+current_version = "5.0.0"
+commit = false
+tag = false
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'

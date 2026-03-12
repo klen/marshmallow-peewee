@@ -1,23 +1,18 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import marshmallow as ma
 import peewee as pw
 import pytest
+
+from marshmallow_peewee.convert import DefaultConverter
 from marshmallow_peewee.fields import ForeignKey
+from marshmallow_peewee.schema import SchemaOpts
 
 from .models import User
 
-if TYPE_CHECKING:
-    from marshmallow_peewee.convert import DefaultConverter
 
-
-@pytest.fixture()
+@pytest.fixture
 def converter():
-    from marshmallow_peewee.convert import DefaultConverter
-    from marshmallow_peewee.schema import SchemaOpts
-
     class CustomConverter(DefaultConverter):
         pass
 

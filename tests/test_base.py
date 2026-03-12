@@ -6,6 +6,9 @@ import marshmallow as ma
 import peewee as pw
 import pytest
 
+from marshmallow_peewee import DefaultConverter, Related
+from marshmallow_peewee import ModelSchema as BaseSchema
+
 from .models import Role, User, proxy
 
 
@@ -16,8 +19,6 @@ def _setup(db):
 
 
 def test_schema():
-    from marshmallow_peewee import ModelSchema as BaseSchema
-
     class UserSchema(BaseSchema[User]):
         created = ma.fields.DateTime("timestamp_ms")
 
@@ -59,9 +60,6 @@ def test_schema():
 
 
 def test_schema_related():
-    from marshmallow_peewee import ModelSchema as BaseSchema
-    from marshmallow_peewee import Related
-
     class UserSchema(BaseSchema[User]):
         role = Related(unknown=ma.EXCLUDE)
 
@@ -117,8 +115,6 @@ def test_schema_related():
 
 
 def tests_partition(db):
-    from marshmallow_peewee import ModelSchema as BaseSchema
-
     class UserSchema(BaseSchema[User]):
         class Meta:
             model = User
@@ -132,9 +128,6 @@ def tests_partition(db):
 
 
 def test_custom_converter(db):
-    from marshmallow_peewee import DefaultConverter
-    from marshmallow_peewee import ModelSchema as BaseSchema
-
     proxy.initialize(db)
     db.create_tables([Role, User], safe=True)
 
@@ -159,8 +152,6 @@ def test_custom_converter(db):
 
 @pytest.mark.parametrize("created_val", ["", "i_am_not_a_number"])
 def test_field_error(db, created_val):
-    from marshmallow_peewee import ModelSchema as BaseSchema
-
     class UserSchema(BaseSchema[User]):
         created = ma.fields.DateTime("timestamp")
 
@@ -181,8 +172,6 @@ def test_field_error(db, created_val):
 
 
 def test_string_fields():
-    from marshmallow_peewee import ModelSchema as BaseSchema
-
     class UserSchema(BaseSchema[User]):
         class Meta:
             model = User

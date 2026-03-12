@@ -1,52 +1,77 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+
 fail_fast: true
+default_install_hook_types: [commit-msg, pre-commit, pre-push]
 
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/qoomon/git-conventional-commits
+    rev: "v2.7.2"
+    hooks:
+      - id: conventional-commits
+        args: ["-c", ".git-commits.yaml"]
+        stages: ["commit-msg"]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-    - id: check-added-large-files
-    - id: check-ast
-    - id: check-case-conflict
-    - id: check-executables-have-shebangs
-    - id: check-merge-conflict
-    - id: check-symlinks
-    - id: check-toml
-    - id: check-yaml
-    - id: debug-statements
-    - id: end-of-file-fixer
-    - id: trailing-whitespace
+      - id: check-case-conflict
+        stages: ["pre-commit"]
+      - id: check-merge-conflict
+        stages: ["pre-commit"]
+      - id: check-added-large-files
+        stages: ["pre-commit"]
+      - id: check-ast
+        stages: ["pre-commit"]
+      - id: check-executables-have-shebangs
+        stages: ["pre-commit"]
+      - id: check-symlinks
+        stages: ["pre-commit"]
+      - id: check-toml
+        stages: ["pre-commit"]
+      - id: check-yaml
+        stages: ["pre-commit"]
+      - id: debug-statements
+        stages: ["pre-commit"]
+      - id: end-of-file-fixer
+        stages: ["pre-commit"]
+      - id: trailing-whitespace
+        stages: ["pre-commit"]
 
-- repo: https://github.com/psf/black
-  rev: 24.10.0
-  hooks:
-  - id: black
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.8.9
+    hooks:
+      - id: uv-lock
+        args: ["--check"]
+        stages: ["pre-commit"]
 
-- repo: https://github.com/python-poetry/poetry
-  rev: '1.8.0'
-  hooks:
-    - id: poetry-check
-    - id: poetry-lock
-      args: ["--no-update"]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.14.14"
+    hooks:
+      # Run the formatter.
+      - id: ruff-format
+        name: ruff format
+        stages: ["pre-commit"]
+      # Run the linter.
+      - id: ruff-check
+        name: ruff check
+        stages: ["pre-commit"]
 
-- repo: local
-  hooks:
+  - repo: https://github.com/facebook/pyrefly-pre-commit
+    rev: 0.50.1 # Note: this is the version of the pre-commit hook, NOT the pyrefly version used for type checking
+    hooks:
+      - id: pyrefly-check
+        name: pyrefly check
+        pass_filenames: false # Recommended to do full repo checks. However, you can change this to `true` to only check changed files
+        language: system # Use system-installed pyrefly
+        stages: ["pre-commit"]
 
-    - id: mypy
-      name: mypy
-      entry: poetry run mypy
-      language: system
-      pass_filenames: false
-
-    - id: ruff
-      name: ruff
-      entry: poetry run ruff marshmallow_peewee
-      language: system
-      pass_filenames: false
-
-    - id: pytest
-      name: pytest
-      entry: poetry run pytest
-      language: system
-      pass_filenames: false
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        files: \.py$
+        stages: ["pre-push"]

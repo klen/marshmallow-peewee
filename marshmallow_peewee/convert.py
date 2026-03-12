@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Optional, cast, overload
+from typing import TYPE_CHECKING, cast, overload
 
 import peewee as pw
 from marshmallow import ValidationError, fields
@@ -28,20 +28,18 @@ class ModelConverterMeta(type):
 class DefaultConverter(metaclass=ModelConverterMeta):
     """Convert Peewee model to Marshmallow schema."""
 
-    TYPE_MAPPING: TFieldMappingList = []
+    TYPE_MAPPING: TFieldMappingList = []  # noqa: RUF012
 
     def __init__(self, opts: SchemaOpts):
         self.opts = opts
 
     def get_fields(self, model: pw.Model) -> OrderedDict[str, fields.Field]:
         result = OrderedDict()
-        meta = cast(pw.Metadata, model._meta)  # type: ignore[]
+        meta = cast("pw.Metadata", model._meta)  # type: ignore[]
         id_keys = self.opts.id_keys
         for field in meta.sorted_fields:
             data_key = field.name
-            if id_keys and isinstance(
-                field, (pw.ForeignKeyField, pw.DeferredForeignKey)
-            ):
+            if id_keys and isinstance(field, (pw.ForeignKeyField, pw.DeferredForeignKey)):
                 data_key = field.column_name
 
             ma_field = self.convert(field, data_key)
@@ -64,7 +62,7 @@ class DefaultConverter(metaclass=ModelConverterMeta):
     def register(
         cls,
         field: type[pw.Field],
-        ma_field: Optional[type[fields.Field]] = None,
+        ma_field: type[fields.Field] | None = None,
     ) -> Callable[[Callable], Callable] | None:
         if ma_field is None:
 
@@ -79,7 +77,7 @@ class DefaultConverter(metaclass=ModelConverterMeta):
 
         return None
 
-    def convert(self, field: pw.Field, data_key: Optional[str] = None) -> fields.Field:
+    def convert(self, field: pw.Field, data_key: str | None = None) -> fields.Field:
         params = {
             "data_key": data_key or field.name,
             "allow_none": field.null,
@@ -152,11 +150,7 @@ def convert_autofield(_: pw.Field, opts: SchemaOpts, **params) -> fields.Field:
 
 @DefaultConverter.register(pw.CharField)  # type: ignore[]
 def convert_charfield(
-    field: pw.CharField,
-    _: SchemaOpts,
-    *,
-    validate: Optional[list] = None,
-    **params,
+    field: pw.CharField, _: SchemaOpts, *, validate: list | None = None, **params
 ) -> fields.Field:
     if validate is None:
         validate = []
@@ -178,10 +172,7 @@ def convert_value_validate(converter: Callable) -> Callable:
     def validator(value):
         try:
             converter(value)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise ValidationError(str(exc)) from exc
 
     return validator
-
-
-# ruff: noqa: N802, N815, ARG002

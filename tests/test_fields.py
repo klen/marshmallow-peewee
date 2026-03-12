@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import pytest
 
+from marshmallow_peewee import FKNested, ModelSchema, Related
+
 from .models import Role, User, proxy
 
 
@@ -12,8 +14,6 @@ def _setup(db):
 
 
 def test_related():
-    from marshmallow_peewee import ModelSchema, Related
-
     class UserSchema(ModelSchema[User]):
         role = Related()
 
@@ -30,8 +30,6 @@ def test_related():
 
 
 def test_fknested():
-    from marshmallow_peewee import FKNested, ModelSchema
-
     class UserSchema(ModelSchema[User]):
         user_role = FKNested(Role, only=("name",), attribute="role")
 

@@ -8,8 +8,6 @@ from typing import (
     Iterable,
     Literal,
     Mapping,
-    Optional,
-    Union,
     overload,
 )
 
@@ -24,7 +22,7 @@ from .types import TVModel
 
 
 class SchemaOpts(ma.SchemaOpts, Generic[TVModel]):
-    model: Optional[type[TVModel]]
+    model: type[TVModel] | None
     dump_only_pk: bool
     string_keys: bool
     id_keys: bool
@@ -38,7 +36,7 @@ class SchemaOpts(ma.SchemaOpts, Generic[TVModel]):
         self.id_keys = getattr(meta, "id_keys", DEFAULTS["id_keys"])
 
         if self.model and not issubclass(self.model, pw.Model):
-            raise ValueError("`model` must be a subclass of peewee.Model")
+            raise ValueError("`model` must be a subclass of peewee.Model")  # noqa: TRY003,EM101
 
         self.model_converter = getattr(meta, "model_converter", DefaultConverter)
 
@@ -95,32 +93,28 @@ class ModelSchema(ma.Schema, Generic[TVModel], metaclass=SchemaMeta):
     opts: SchemaOpts[TVModel]
     Meta: ClassVar[type[Any]]
 
-    def __init__(self, instance: Optional[TVModel] = None, **kwargs):
+    def __init__(self, instance: TVModel | None = None, **kwargs):
         self.instance = instance
         super(ModelSchema, self).__init__(**kwargs)
 
-    @overload  # type: ignore[override]
-    def load(
-        self, data, *, many: Optional[Literal[False]] = None, **kwargs
-    ) -> TVModel: ...
+    @overload
+    def load(self, data, *, many: Literal[False] | None = None, **kwargs) -> TVModel: ...  # type: ignore[override]
 
     @overload
-    def load(
-        self, data, *, many: Optional[Literal[True]] = None, **kwargs
-    ) -> list[TVModel]: ...
+    def load(self, data, *, many: Literal[True] | None = None, **kwargs) -> list[TVModel]: ...
 
     def load(
         self,
-        data: Union[Mapping[str, Any], Iterable[Mapping[str, Any]]],
+        data: Mapping[str, Any] | Iterable[Mapping[str, Any]],
         *,
-        instance: Optional[TVModel] = None,
+        instance: TVModel | None = None,
         **kwargs,
     ):
         self.instance = instance or self.instance
         return super().load(data, **kwargs)
 
     @ma.post_load
-    def make_instance(self, data: dict[str, Any], **params) -> Union[dict, TVModel]:
+    def make_instance(self, data: dict[str, Any], **params) -> dict | TVModel:
         """Build object from data."""
         if not self.opts.model:
             return data
@@ -135,8 +129,8 @@ class ModelSchema(ma.Schema, Generic[TVModel], metaclass=SchemaMeta):
 
     if TYPE_CHECKING:
 
-        @overload  # type: ignore[override]
-        def dump(self, obj) -> dict[str, Any]: ...
+        @overload
+        def dump(self, obj) -> dict[str, Any]: ...  # type: ignore[override]
 
         @overload
         def dump(self, obj, *, many: Literal[False]) -> dict[str, Any]: ...
@@ -145,5 +139,5 @@ class ModelSchema(ma.Schema, Generic[TVModel], metaclass=SchemaMeta):
         def dump(self, obj, *, many: Literal[True]) -> list[dict[str, Any]]: ...
 
         def dump(
-            self, obj: Union[TVModel, Iterable[TVModel]], *, many: Optional[bool] = None
-        ) -> Union[dict[str, Any], list[dict[str, Any]]]: ...
+            self, obj: TVModel | Iterable[TVModel], *, many: bool | None = None
+        ) -> dict[str, Any] | list[dict[str, Any]]: ...

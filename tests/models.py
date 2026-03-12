@@ -19,7 +19,7 @@ class SubclassedCharField(pw.CharField):
 
 
 class User(pw.Model):
-    id = pw.AutoField()  # noqa: A003
+    id = pw.AutoField()
     created = pw.DateTimeField(default=dt.datetime.now)
     name = SubclassedCharField(255)
     title = pw.CharField(127, null=True)

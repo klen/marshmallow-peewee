@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional, Union
+from typing import Any
 
 import peewee as pw
 from marshmallow import Schema, fields
@@ -9,8 +9,8 @@ from marshmallow import Schema, fields
 class Related(fields.Nested):
     def __init__(
         self,
-        nested: Optional[type[Schema]] = None,
-        meta: Optional[dict[str, Any]] = None,
+        nested: type[Schema] | None = None,
+        meta: dict[str, Any] | None = None,
         **kwargs,
     ):
         self.field = None
@@ -36,7 +36,7 @@ class Related(fields.Nested):
 
     def _deserialize(self, value, attr, data, partial=None, **_):
         if self.field is None:
-            raise RuntimeError("Init model first.")
+            raise RuntimeError("Init model first.")  # noqa: TRY003, EM101
 
         if not isinstance(value, dict):
             return self.field.rel_field.python_value(value)
@@ -62,7 +62,7 @@ class ForeignKey(fields.Raw):
 class FKNested(fields.Nested):
     """Get an related instance from cache."""
 
-    def __init__(self, nested: Union[type[Schema], type[pw.Model]], **kwargs):
+    def __init__(self, nested: type[Schema | pw.Model], **kwargs):
         if issubclass(nested, pw.Model):
             nested = self.get_schema(nested, **kwargs)
 
@@ -87,3 +87,6 @@ class FKNested(fields.Nested):
             return None
 
         return obj.__rel__[data_key]
+
+
+# ruff: noqa: PLC0415
